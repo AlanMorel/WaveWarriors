@@ -13,6 +13,7 @@ void setup() {
 
 void draw() {
   if (state == MAIN_MENU_STATE) {
-    mainMenu.display(); 
+    mainMenu.update();
+    mainMenu.draw(); 
   }
 }

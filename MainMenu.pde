@@ -1,7 +1,7 @@
 public class MainMenu {
 
   private PImage background, foreground;
-  private float movingGridOffset;
+  private float offset;
   private boolean buttonSelectorIsOnPlay;
 
   private float SQUARE_SIDE = 32;
@@ -16,23 +16,26 @@ public class MainMenu {
   public MainMenu() {
     background = loadImage("mainmenubackground.png");
     foreground = loadImage("mainmenuforeground.png");
-    movingGridOffset = 0;
+    offset = 0;
     buttonSelectorIsOnPlay = true;
   }
 
-  public void display() {
+  public void update(){
+     updateButtonSelector();
+     updateOffset();
+  }
+
+  public void draw() {
     image(background, 0, 0);
 
     stroke(0, 150, 150, 50);
     drawHorizontalLines();
     drawVerticalLines();
 
-    updateButtonSelector();
     drawButtonSelector();
 
     image(foreground, 0, 0);
   }
-
 
   public void updateButtonSelector() {
     if (keyPressed && key == CODED) {
@@ -44,28 +47,28 @@ public class MainMenu {
     }
   }
 
-
   private void drawHorizontalLines() {
     for (int i = 0; i < height / SQUARE_SIDE; i++) {
-      float lineY = i * SQUARE_SIDE;
-      line(0, lineY, width, lineY);
+      float y = i * SQUARE_SIDE;
+      line(0, y, width, y);
     }
   }
-
 
   private void drawVerticalLines() {
     for (int i = 0; i < width / SQUARE_SIDE; i++) {
-      float lineX = i * SQUARE_SIDE + (movingGridOffset % SQUARE_SIDE);
-      line(lineX, 0, lineX, height);
+      float x = i * SQUARE_SIDE + offset;
+      line(x, 0, x, height);
     }
-    movingGridOffset++;
   }
-
 
   private void drawButtonSelector() {
     rectMode(CENTER);
     fill(255, 50);
     rect(width/2, buttonSelectorIsOnPlay ? PLAY_BUTTON_CENTER_Y : EXIT_BUTTON_CENTER_Y, SELECTOR_WIDTH, SELECTOR_HEIGHT, SELECTOR_RADIUS);
+  }
+  
+  private void updateOffset(){
+     offset = (offset + 1) % SQUARE_SIDE;
   }
 }
 
