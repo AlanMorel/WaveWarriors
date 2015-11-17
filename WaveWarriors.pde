@@ -1,32 +1,17 @@
-final static float NUM_HORIZONTAL_LINES = 32;
-final static float NUM_VERTICAL_LINES = 56.89;
+private int state;
+private MainMenu mainMenu;
 
-float movingGridOffset;  // Increasing offset causes grid to appear to move.
+public static final int MAIN_MENU_STATE = 1;
 
 void setup() {
   size(1280, 720);
-  int movingGridOffSet = 0;
+  state = MAIN_MENU_STATE;
+  
+  mainMenu = new MainMenu();
 }
 
 void draw() {
-  background(0, 255, 191);
-  drawHorizontalLines();
-  drawVerticalLines();
-}
-
-void drawHorizontalLines() {
-  for (int i = 0; i < NUM_HORIZONTAL_LINES; i++) {
-    stroke(0, 153, 153, i % 2 == 0 ? 50 : 90);
-    float lineY = (height/NUM_HORIZONTAL_LINES * i);
-    line(0, lineY, width, lineY);
+  if (state == MAIN_MENU_STATE) {
+    mainMenu.display(); 
   }
-}
-
-void drawVerticalLines() {
-  for (int i = 0; i < NUM_VERTICAL_LINES; i++) {
-    stroke(0, 153, 153, 60);
-    float lineX = (width/NUM_VERTICAL_LINES * i) + (movingGridOffset % (width/NUM_VERTICAL_LINES));
-    line(lineX, 0, lineX, height);
-  }
-  movingGridOffset ++;
 }
