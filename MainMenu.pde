@@ -1,16 +1,17 @@
 public class MainMenu {
 
   private PImage background, foreground;
-  private float movingGridOffset;  // Increasing offset causes grid to appear to move.
+  private float movingGridOffset;
   private boolean buttonSelectorIsOnPlay;
 
-  final static float EXIT_BUTTON_CENTER_Y = 483;
-  final static float NUM_HORIZONTAL_LINES = 32;
-  final static float NUM_VERTICAL_LINES = 56.89;
-  final static float PLAY_BUTTON_CENTER_Y = 395;
-  final static float SELECTOR_HEIGHT = 67;
-  final static float SELECTOR_RADIUS = 40;
-  final static float SELECTOR_WIDTH = 275;
+  private float SQUARE_SIDE = 32;
+
+  private float EXIT_BUTTON_CENTER_Y = 483;
+  private float PLAY_BUTTON_CENTER_Y = 395;
+  
+  private float SELECTOR_HEIGHT = 67;
+  private float SELECTOR_RADIUS = 40;
+  private float SELECTOR_WIDTH = 275;
 
   public MainMenu() {
     background = loadImage("mainmenubackground.png");
@@ -20,17 +21,16 @@ public class MainMenu {
   }
 
   public void display() {
-    background(0, 255, 191);
-    
     image(background, 0, 0);
 
+    stroke(0, 150, 150, 50);
     drawHorizontalLines();
     drawVerticalLines();
 
-    image(foreground, 0, 0);
-
     updateButtonSelector();
     drawButtonSelector();
+
+    image(foreground, 0, 0);
   }
 
 
@@ -46,18 +46,16 @@ public class MainMenu {
 
 
   private void drawHorizontalLines() {
-    for (int i = 0; i < NUM_HORIZONTAL_LINES; i++) {
-      stroke(0, 153, 153, i % 2 == 0 ? 50 : 90);
-      float lineY = (height/NUM_HORIZONTAL_LINES * i);
+    for (int i = 0; i < height / SQUARE_SIDE; i++) {
+      float lineY = i * SQUARE_SIDE;
       line(0, lineY, width, lineY);
     }
   }
 
 
   private void drawVerticalLines() {
-    for (int i = 0; i < NUM_VERTICAL_LINES; i++) {
-      stroke(0, 153, 153, 60);
-      float lineX = (width/NUM_VERTICAL_LINES * i) + (movingGridOffset % (width/NUM_VERTICAL_LINES));
+    for (int i = 0; i < width / SQUARE_SIDE; i++) {
+      float lineX = i * SQUARE_SIDE + (movingGridOffset % SQUARE_SIDE);
       line(lineX, 0, lineX, height);
     }
     movingGridOffset++;
