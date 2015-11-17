@@ -14,7 +14,7 @@ public class MainMenu {
 
   
   public MainMenu() {
-    startScreenImage = loadImage("startScreen.jpg");
+    startScreenImage = loadImage("titlescreen.png");
     movingGridOffset = 0;
     buttonSelectorIsOnPlay = true;
   }
