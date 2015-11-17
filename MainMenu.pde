@@ -1,6 +1,6 @@
 public class MainMenu {
-  
-  private PImage startScreenImage;
+
+  private PImage background, foreground;
   private float movingGridOffset;  // Increasing offset causes grid to appear to move.
   private boolean buttonSelectorIsOnPlay;
 
@@ -12,40 +12,39 @@ public class MainMenu {
   final static float SELECTOR_RADIUS = 40;
   final static float SELECTOR_WIDTH = 275;
 
-  
   public MainMenu() {
-    startScreenImage = loadImage("titlescreen.png");
+    background = loadImage("mainmenubackground.png");
+    foreground = loadImage("mainmenuforeground.png");
     movingGridOffset = 0;
     buttonSelectorIsOnPlay = true;
   }
 
-  
   public void display() {
     background(0, 255, 191);
     
-    imageMode(CENTER);
-    tint(255, 175);  // Apply transparency without changing color
-    image(startScreenImage, width/2, height/2);
-    
+    image(background, 0, 0);
+
     drawHorizontalLines();
     drawVerticalLines();
-    
+
+    image(foreground, 0, 0);
+
     updateButtonSelector();
     drawButtonSelector();
   }
-  
-  
+
+
   public void updateButtonSelector() {
     if (keyPressed && key == CODED) {
       if (keyCode == DOWN) {
         buttonSelectorIsOnPlay = false;
       } else if (keyCode == UP) {
-        buttonSelectorIsOnPlay = true; 
+        buttonSelectorIsOnPlay = true;
       }
     }
   }
-  
-  
+
+
   private void drawHorizontalLines() {
     for (int i = 0; i < NUM_HORIZONTAL_LINES; i++) {
       stroke(0, 153, 153, i % 2 == 0 ? 50 : 90);
@@ -53,8 +52,8 @@ public class MainMenu {
       line(0, lineY, width, lineY);
     }
   }
-  
-  
+
+
   private void drawVerticalLines() {
     for (int i = 0; i < NUM_VERTICAL_LINES; i++) {
       stroke(0, 153, 153, 60);
@@ -63,13 +62,12 @@ public class MainMenu {
     }
     movingGridOffset++;
   }
-  
-  
+
+
   private void drawButtonSelector() {
     rectMode(CENTER);
     fill(255, 50);
     rect(width/2, buttonSelectorIsOnPlay ? PLAY_BUTTON_CENTER_Y : EXIT_BUTTON_CENTER_Y, SELECTOR_WIDTH, SELECTOR_HEIGHT, SELECTOR_RADIUS);
   }
-
-
 }
+
