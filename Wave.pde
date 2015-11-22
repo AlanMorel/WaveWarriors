@@ -58,8 +58,8 @@ public class Wave {
   }
   
   private boolean enemyIsOnScreen(final Enemy e) {
-    final boolean withinVerticalSides = e.x > e.radius && e.x < width - e.radius;
-    final boolean withinHorizontalSides = e.y > e.radius && e.y < height - e.radius;
+    final boolean withinVerticalSides = (e.x > (e.radius + 10)) && (e.x < width - (e.radius + 10));
+    final boolean withinHorizontalSides = (e.y > (e.radius + 10)) && (e.y < height - (e.radius + 10));
     return withinVerticalSides && withinHorizontalSides;
   }
   

@@ -55,8 +55,8 @@ public class Enemy extends Entity {
     final float deltaX = x - (nearestPlayer.x + xTargetOffset);
     final float direction  = atan2(deltaY, deltaX);
     
-    x = constrain(x - speed*cos(direction), radius, width - radius);
-    y = constrain(y - speed*sin(direction), radius, height - radius);
+    x = constrain(x - (speed*cos(direction)), (radius + 11), width - (radius + 11));
+    y = constrain(y - (speed*sin(direction)), (radius + 11), height - (radius + 11));
   }
   
   private Player getNearestPlayer(final Player[] players) {
@@ -87,21 +87,21 @@ public class Enemy extends Entity {
   
   private void setTargetPosition() {
     this.frameNumber = 0;
-    this.framesBeforeUpdatingTarget = (int)random(300, 800); 
-    this.xTargetOffset = random(-500, 500);
-    this.yTargetOffset = random(-500, 500);
+    this.framesBeforeUpdatingTarget = (int)random(100, 600); 
+    this.xTargetOffset = random(-width/2, width/2);
+    this.yTargetOffset = random(-width/3, width/3);
   }
   
   private void advanceOntoScreen() {
-    if (x < radius) {
+    if (x < (radius + 10)) {
       x += speed;
-    } else if (x > width + radius) {
+    } else if (x > width - (radius + 10)) {
       x -= speed; 
     }
     
-    if (y < radius) {
+    if (y < (radius + 10)) {
       y += speed; 
-    } else if (y > height + radius) {
+    } else if (y > height - (radius + 10)) {
       y -= speed;
     }
   }
