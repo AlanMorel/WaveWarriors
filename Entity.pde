@@ -1,10 +1,10 @@
 public abstract class Entity {
 
-  protected int x, y;
+  protected float x, y;
   protected int hp;
   protected int radius;
 
-  public Entity(int x, int y, int hp, int diameter) {
+  public Entity(float x, float y, int hp, int diameter) {
     this.x = x;
     this.y = y;
     this.hp = hp;

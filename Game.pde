@@ -1,31 +1,39 @@
 public class Game {
 
   private PImage background;
+  private int numPlayers;
   private Player[] players;
   private boolean paused;
+  private Wave wave;
+  private int waveLevel;
+  
+  public static final int FIRST_WAVE_LEVEL = 1;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
 
     this.background = loadImage("gamebackground.png");
+    this.numPlayers = 0;
     this.players = new Player[4];
 
     if (player1) {
-      this.players[0] = new Player(1, 100, 100);
+      this.players[numPlayers++] = new Player(1, 100, 100);
     }
 
     if (player2) {
-      this.players[1] = new Player(2, 500, 100);
+      this.players[numPlayers++] = new Player(2, 500, 100);
     }
 
     if (player3) {
-      this.players[2] = new Player(3, 100, 500);
+      this.players[numPlayers++] = new Player(3, 100, 500);
     }
 
     if (player4) {
-      this.players[3] = new Player(4, 500, 500);
+      this.players[numPlayers++] = new Player(4, 500, 500);
     }
 
     this.paused = false;
+    this.waveLevel = FIRST_WAVE_LEVEL;
+    this.wave = new Wave(this, waveLevel);
   }
 
   public void update() {
@@ -54,6 +62,8 @@ public class Game {
         players[id].draw();
       }
     }
+      
+    wave.display();
 
     if (paused) {
       drawPauseMenu();
@@ -69,6 +79,10 @@ public class Game {
     textSize(100);
     fill(255, 255);
     text("Game Paused", width / 2, height / 2);
+  }
+  
+  public Player[] getPlayers() {
+    return (Player[])players.clone();
   }
 }
 
