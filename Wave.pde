@@ -5,8 +5,8 @@ public class Wave {
   private int numEnemies;
   private ArrayList<Enemy> enemies;
   
-  public static final int BASE_NUMBER_OF_ENEMIES = 10;
-  public static final float ENEMIES_PER_WAVE_FACTOR = 6.0;
+  public static final int BASE_NUMBER_OF_ENEMIES = 5;
+  public static final float ENEMIES_PER_WAVE_FACTOR = 3.0;
  
   Wave(final Game game, final int waveNum) {
     this.game = game;
@@ -32,11 +32,11 @@ public class Wave {
       if (enemySpawnsOnSide) {
         yPos = random(0, height);
         final boolean enemySpawnsOnLeft = randomBoolean();
-        xPos = enemySpawnsOnLeft ? random(-300, -50) : random(width + 50, width + 300);
+        xPos = enemySpawnsOnLeft ? random(-400, -100) : random(width + 100, width + 400);
       } else {
         xPos = random(0, height);
         final boolean enemySpawnsOnTop = randomBoolean();
-        yPos = enemySpawnsOnTop ? random(-300, -50) : random(height + 50, height + 300);
+        yPos = enemySpawnsOnTop ? random(-400, -100) : random(height + 100, height + 400);
       }
       
       enemies.add(new Enemy(this.waveNum, id, xPos, yPos));
@@ -50,7 +50,6 @@ public class Wave {
       } else {
         e.advanceOntoScreen();
       }
-      println("xPos " + e.x + ", yPos " + e.y);
     }
   }
   

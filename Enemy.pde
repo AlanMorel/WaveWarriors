@@ -5,10 +5,18 @@ public class Enemy extends Entity {
   private float speed;
   private int wave;
   
+  // Each enemy will have its own favored position from which to attack the player (e.g., 50 pixels east and 40 pixels north of the nearest player)
+  private float xTargetOffset;
+  private float yTargetOffset;
+  
+  // The enemy will occasionally change it's aforementioned favored attack position, allowing for more realistic movement.
+  private int framesBeforeUpdatingTarget;
+  private int frameNumber;
+  
   public static final int ENEMY_RADIUS = 50;
   public static final int HEALTH_FACTOR = 10;
-  public static final float SPEED_FACTOR = 0.6;
-  public static final float SPEED_WILDCARD = 0.5;
+  public static final float SPEED_FACTOR = 1.4;
+  public static final float SPEED_WILDCARD = 0.9;
 
   public Enemy(int wave, int id, float x, float y) {
     super(x, y, (int)wave*HEALTH_FACTOR, ENEMY_RADIUS);
@@ -16,6 +24,8 @@ public class Enemy extends Entity {
     this.remainingHealth = hp;
     this.speed = (wave + random(-SPEED_WILDCARD, SPEED_WILDCARD)) * SPEED_FACTOR;
     this.wave = wave;
+    
+    setTargetPosition();
   }
 
   public void draw() {
@@ -38,18 +48,20 @@ public class Enemy extends Entity {
   }
   
   public void advanceToNearestPlayer(final Player[] players) {
+    updateTargetPosition();
+    
     final Player nearestPlayer = getNearestPlayer(players);
-    final float deltaY = y - nearestPlayer.y;
-    final float deltaX = x - nearestPlayer.x;
+    final float deltaY = y - (nearestPlayer.y + yTargetOffset);
+    final float deltaX = x - (nearestPlayer.x + xTargetOffset);
     final float direction  = atan2(deltaY, deltaX);
     
-    x -= speed*cos(direction);
-    y -= speed*sin(direction);
+    x = constrain(x - speed*cos(direction), radius, width - radius);
+    y = constrain(y - speed*sin(direction), radius, height - radius);
   }
   
   private Player getNearestPlayer(final Player[] players) {
     if (players.length < 1) {
-      System.out.println("No players detected.");
+      System.out.println("Error: No players detected.");
       return null; 
     }
     
@@ -65,6 +77,19 @@ public class Enemy extends Entity {
     }
     
     return closestPlayer; 
+  }
+  
+  private void updateTargetPosition() {
+    if (frameNumber++ >= framesBeforeUpdatingTarget) {
+      setTargetPosition();
+    }
+  }
+  
+  private void setTargetPosition() {
+    this.frameNumber = 0;
+    this.framesBeforeUpdatingTarget = (int)random(300, 800); 
+    this.xTargetOffset = random(-500, 500);
+    this.yTargetOffset = random(-500, 500);
   }
   
   private void advanceOntoScreen() {
