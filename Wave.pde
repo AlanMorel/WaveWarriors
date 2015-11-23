@@ -19,7 +19,8 @@ public class Wave {
   }
   
   public void display() {
-    updateEnemies();
+    removeDeadEnemies();
+    advanceEnemies();
     drawEnemies();
     drawEnemyHealthBars();
   }
@@ -64,14 +65,12 @@ public class Wave {
     return withinVerticalSides && withinHorizontalSides;
   }
   
-  private void updateEnemies() {
+  private void removeDeadEnemies() {
     for (final Enemy e : enemies) {
       if (e.noHealthLeft()) {
         enemies.remove(e); 
       }
     }
-    
-    advanceEnemies();
   }
   
   private void drawEnemies() {
@@ -82,7 +81,7 @@ public class Wave {
   
   private void drawEnemyHealthBars() {
     for (final Enemy e : enemies) {
-      new EnemyHealthBar().displayForEnemy(e);
+      e.displayHealthBar();
     } 
   }
 }

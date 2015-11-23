@@ -24,6 +24,11 @@ public class Enemy extends Entity {
   public static final float SPEED_FACTOR = 1.1;
   public static final float SPEED_TO_REACH_SCREEN_FACTOR = 1.4;  // Causes slower enemies to more quickly reach the battleground.
   public static final float SPEED_WILDCARD = 0.4;
+  
+  public static final float HP_BAR_HEIGHT = 10.0;
+  public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
+  public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 20;
+  public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
   public Enemy(int wave, int id, float x, float y) {
     super(x, y, BASE_HEALTH + (int)wave*HEALTH_FACTOR, ENEMY_RADIUS);
@@ -106,6 +111,26 @@ public class Enemy extends Entity {
     } else if (y > height - (radius + 10)) {
       y -= speed*SPEED_TO_REACH_SCREEN_FACTOR;
     }
+  }
+  
+  private void displayHealthBar() {
+    final float hpCapacity = getRemainingHP();
+    final float barPositionX = x;
+    final float barPositionY = y - radius - HP_BAR_HEIGHT - HP_BAR_DISTANCE_ABOVE_ENEMY;
+    
+    stroke(0);
+    strokeWeight(1.5);
+    fill(255, 102, 102);
+    rectMode(CORNER);
+    rect(barPositionX, barPositionY, hpCapacity*HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
+  
+    drawRemainingHPBar(getRemainingHP(), barPositionX, barPositionY);  
+  }
+  
+  private void drawRemainingHPBar(float hpRemaining, float barPositionX, float barPositionY) {
+    strokeWeight(0);
+    fill(77, 255, 136);
+    rect(barPositionX, barPositionY, hpRemaining*HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
   
   private boolean noHealthLeft() {
