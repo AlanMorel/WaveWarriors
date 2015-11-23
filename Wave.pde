@@ -5,7 +5,7 @@ public class Wave {
   private int numEnemies;
   private ArrayList<Enemy> enemies;
   
-  public static final int BASE_NUMBER_OF_ENEMIES = 5;
+  public static final int BASE_NUMBER_OF_ENEMIES = 2;
   public static final float ENEMIES_PER_WAVE_FACTOR = 3.0;
  
   Wave(final Game game, final int waveNum) {
@@ -21,6 +21,7 @@ public class Wave {
   public void display() {
     updateEnemies();
     drawEnemies();
+    drawEnemyHealthBars();
   }
   
   private void createEnemies() {
@@ -77,5 +78,11 @@ public class Wave {
     for (final Enemy e : enemies) {
       e.draw(); 
     }
+  }
+  
+  private void drawEnemyHealthBars() {
+    for (final Enemy e : enemies) {
+      new EnemyHealthBar().displayForEnemy(e);
+    } 
   }
 }

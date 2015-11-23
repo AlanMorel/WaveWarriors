@@ -7,7 +7,7 @@ public class Game {
   private Wave wave;
   private int waveLevel;
   
-  public static final int FIRST_WAVE_LEVEL = 1;
+  public static final int FIRST_WAVE_LEVEL = 10;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
 

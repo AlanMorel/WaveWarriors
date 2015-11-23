@@ -6,31 +6,32 @@ public class Enemy extends Entity {
   private int wave;
   
   // Each enemy will have its own favored position from which to attack the player (e.g., 50 pixels east and 40 pixels north of the nearest player)
-  private float xTargetOffset;
-  private float yTargetOffset;
+  private int xTargetOffset;
+  private int yTargetOffset;
   
   // The enemy will occasionally change it's aforementioned favored attack position, allowing for more realistic movement.
   private int framesBeforeUpdatingTarget;
   private int frameNumber;
   
+  public static final int BASE_HEALTH = 5;
   public static final int ENEMY_RADIUS = 50;
-  public static final int HEALTH_FACTOR = 10;
-  public static final float SPEED_FACTOR = 1.4;
-  public static final float SPEED_WILDCARD = 0.9;
+  public static final int HEALTH_FACTOR = 2;
+  public static final float SPEED_FACTOR = 1.1;
+  public static final float SPEED_TO_REACH_SCREEN_FACTOR = 1.4;  // Causes slower enemies to more quickly reach the battleground.
+  public static final float SPEED_WILDCARD = 0.4;
 
   public Enemy(int wave, int id, float x, float y) {
-    super(x, y, (int)wave*HEALTH_FACTOR, ENEMY_RADIUS);
+    super(x, y, BASE_HEALTH + (int)wave*HEALTH_FACTOR, ENEMY_RADIUS);
     this.id = id;
     this.remainingHealth = hp;
-    this.speed = (wave + random(-SPEED_WILDCARD, SPEED_WILDCARD)) * SPEED_FACTOR;
+    this.speed = random(-SPEED_WILDCARD*wave, SPEED_WILDCARD*wave)*SPEED_FACTOR;
     this.wave = wave;
     
-    setTargetPosition();
+    setNewTargetPosition();
   }
 
   public void draw() {
     drawEnemy();
-    drawHealthBar();
   }
 
   private void drawEnemy() {
@@ -40,23 +41,21 @@ public class Enemy extends Entity {
     ellipse(x, y, radius*2, radius*2);
   }
 
-  private void drawHealthBar() {
-    fill(0, 0, 0, 255);
-    textAlign(CENTER);
-    textSize(16);
-    
-  }
-  
   public void advanceToNearestPlayer(final Player[] players) {
-    updateTargetPosition();
-    
+    if (frameNumber++ >= framesBeforeUpdatingTarget) {
+      setNewTargetPosition();
+    }
+        
     final Player nearestPlayer = getNearestPlayer(players);
     final float deltaY = y - (nearestPlayer.y + yTargetOffset);
     final float deltaX = x - (nearestPlayer.x + xTargetOffset);
     final float direction  = atan2(deltaY, deltaX);
     
-    x = constrain(x - (speed*cos(direction)), (radius + 11), width - (radius + 11));
-    y = constrain(y - (speed*sin(direction)), (radius + 11), height - (radius + 11));
+    final boolean hasReachedTargetPosition = (abs(deltaX) < 0.9) && (abs(deltaY) < 0.9);
+    if (!hasReachedTargetPosition) {
+      x = constrain(x - (speed*cos(direction)), (radius + 11), width - (radius + 11));
+      y = constrain(y - (speed*sin(direction)), (radius + 11), height - (radius + 11));
+    }
   }
   
   private Player getNearestPlayer(final Player[] players) {
@@ -78,36 +77,38 @@ public class Enemy extends Entity {
     
     return closestPlayer; 
   }
-  
-  private void updateTargetPosition() {
-    if (frameNumber++ >= framesBeforeUpdatingTarget) {
-      setTargetPosition();
-    }
-  }
-  
-  private void setTargetPosition() {
+
+  private void setNewTargetPosition() {
     this.frameNumber = 0;
-    this.framesBeforeUpdatingTarget = (int)random(100, 600); 
-    this.xTargetOffset = random(-width/2, width/2);
-    this.yTargetOffset = random(-width/3, width/3);
+    this.framesBeforeUpdatingTarget = (int)random(180, 660); 
+    this.xTargetOffset = (int)random(-350, 350);
+    this.yTargetOffset = (int)random(-200, 200);
   }
   
   private void advanceOntoScreen() {
     if (x < (radius + 10)) {
-      x += speed;
+      x += speed*SPEED_TO_REACH_SCREEN_FACTOR;
     } else if (x > width - (radius + 10)) {
-      x -= speed; 
+      x -= speed*SPEED_TO_REACH_SCREEN_FACTOR; 
     }
     
     if (y < (radius + 10)) {
-      y += speed; 
+      y += speed*SPEED_TO_REACH_SCREEN_FACTOR; 
     } else if (y > height - (radius + 10)) {
-      y -= speed;
+      y -= speed*SPEED_TO_REACH_SCREEN_FACTOR;
     }
   }
   
   private boolean noHealthLeft() {
     return remainingHealth <= 0; 
+  }
+  
+  public int getRemainingHP() {
+    return remainingHealth; 
+  }
+  
+  public int getHPCapacity() {
+    return hp;
   }
 }
 
