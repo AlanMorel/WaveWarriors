@@ -55,6 +55,7 @@ public class Player extends Entity {
   private void drawPlayer() {
     fill(0, 0, 0, 100);
     stroke(0, 0, 0, 255);
+    strokeWeight(2);
 
     ellipse(x, y, radius * 2, radius  * 2);
   }
