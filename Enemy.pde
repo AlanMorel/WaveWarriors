@@ -1,5 +1,5 @@
 public class Enemy extends Entity {
-
+  
   private int id;
   private int remainingHealth;
   private float speed;
@@ -13,9 +13,14 @@ public class Enemy extends Entity {
   private int framesBeforeUpdatingTarget;
   private int frameNumber;
   
+  private float rFillColor;
+  private float gFillColor;
+  private float bFillColor;
+  
   public static final int BASE_HEALTH = 5;
   public static final int ENEMY_RADIUS = 50;
   public static final int HEALTH_FACTOR = 2;
+  public static final float MAX_COLOR_VALUE = 90;
   public static final float SPEED_FACTOR = 1.1;
   public static final float SPEED_TO_REACH_SCREEN_FACTOR = 1.4;  // Causes slower enemies to more quickly reach the battleground.
   public static final float SPEED_WILDCARD = 0.4;
@@ -27,6 +32,10 @@ public class Enemy extends Entity {
     this.speed = random(-SPEED_WILDCARD*wave, SPEED_WILDCARD*wave)*SPEED_FACTOR;
     this.wave = wave;
     
+    this.rFillColor = random(MAX_COLOR_VALUE);
+    this.gFillColor = random(MAX_COLOR_VALUE);
+    this.bFillColor = random(MAX_COLOR_VALUE);
+    
     setNewTargetPosition();
   }
 
@@ -35,7 +44,7 @@ public class Enemy extends Entity {
   }
 
   private void drawEnemy() {
-    fill(0);
+    fill(rFillColor, gFillColor, bFillColor);
     stroke(255);
     strokeWeight(5);
     ellipse(x, y, radius*2, radius*2);
