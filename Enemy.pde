@@ -1,5 +1,7 @@
 public class Enemy extends Entity {
   
+  private Game game;
+  
   private int id;
   private int remainingHealth;
   private float speed;
@@ -17,7 +19,13 @@ public class Enemy extends Entity {
   private float gFillColor;
   private float bFillColor;
   
+  private ArrayList<Bullet> firedBullets;
+  private int numFramesBetweenRounds;
+  private int numBullets;
+  
+  public static final float BASE_BULLET_SPEED = 2;
   public static final int BASE_HEALTH = 5;
+  public static final int BULLET_SPEED_FACTOR = 3;
   public static final int ENEMY_RADIUS = 50;
   public static final int HEALTH_FACTOR = 2;
   public static final float MAX_COLOR_VALUE = 90;
@@ -30,8 +38,10 @@ public class Enemy extends Entity {
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 20;
   public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
-  public Enemy(int wave, int id, float x, float y) {
-    super(x, y, BASE_HEALTH + (int)wave*HEALTH_FACTOR, ENEMY_RADIUS);
+  public Enemy(final Game game, final int wave, final int id, final float x, final float y) {
+    super(x, y, BASE_HEALTH + wave*HEALTH_FACTOR, ENEMY_RADIUS);
+    
+    this.game = game;
     this.id = id;
     this.remainingHealth = hp;
     this.speed = random(-SPEED_WILDCARD*wave, SPEED_WILDCARD*wave)*SPEED_FACTOR;
@@ -41,7 +51,52 @@ public class Enemy extends Entity {
     this.gFillColor = random(MAX_COLOR_VALUE);
     this.bFillColor = random(MAX_COLOR_VALUE);
     
+    this.numBullets = (wave + 5) * 2;
+    firedBullets = new ArrayList<Bullet>();
+    updateFireRate();
+     
     setNewTargetPosition();
+  }
+
+  public void makeBestMovement(final Player[] players) {
+    if (numBullets <= 0) {
+      retreatFromNearestPlayer(); 
+    } else {
+      advanceToNearestPlayer();
+      updateShootingStatus();
+    }
+  }
+  
+  public void retreatFromNearestPlayer() {
+    final Player nearestPlayer = getNearestPlayer();
+    final float deltaY = y - (nearestPlayer.y + yTargetOffset);
+    final float deltaX = x - (nearestPlayer.x + xTargetOffset);
+    final float direction  = atan2(deltaY, deltaX);
+    
+    x = constrain(x + (speed*cos(direction)), (radius + 11), width - (radius + 11));
+    y = constrain(y + (speed*sin(direction)), (radius + 11), height - (radius + 11));
+  }
+  
+  public void updateFireRate() {
+    numFramesBetweenRounds = (int)random(120, 600);
+  }
+  
+  public void updateShootingStatus() {
+    if ((numBullets > 0) && (--numFramesBetweenRounds == 0)) {
+      fireAtNearestPlayer();
+      updateFireRate(); 
+    }
+  }
+  
+  public void fireAtNearestPlayer() {
+    if (numBullets > 0) {
+      final Player nearestPlayer = getNearestPlayer();
+      
+      final Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy());
+      firedBullets.add(bullet);
+      bullet.fireAtPlayer(nearestPlayer);
+      numBullets--;
+    };
   }
 
   public void draw() {
@@ -55,12 +110,12 @@ public class Enemy extends Entity {
     ellipse(x, y, radius*2, radius*2);
   }
 
-  public void advanceToNearestPlayer(final Player[] players) {
+  public void advanceToNearestPlayer() {
     if (frameNumber++ >= framesBeforeUpdatingTarget) {
       setNewTargetPosition();
     }
         
-    final Player nearestPlayer = getNearestPlayer(players);
+    final Player nearestPlayer = getNearestPlayer();
     final float deltaY = y - (nearestPlayer.y + yTargetOffset);
     final float deltaX = x - (nearestPlayer.x + xTargetOffset);
     final float direction  = atan2(deltaY, deltaX);
@@ -72,7 +127,9 @@ public class Enemy extends Entity {
     }
   }
   
-  private Player getNearestPlayer(final Player[] players) {
+  private Player getNearestPlayer() {
+    final Player[] players = game.getPlayers();
+    
     if (players.length < 1) {
       System.out.println("Error: No players detected.");
       return null; 
@@ -143,6 +200,22 @@ public class Enemy extends Entity {
   
   public int getHPCapacity() {
     return hp;
+  }
+  
+  public void displayActiveBullets() {
+    for (final Bullet b : firedBullets) {
+      b.display(); 
+    } 
+  }
+  
+  public int getBulletAccuracy() {
+    if (wave <= 3) {
+      return Bullet.LOW_ACCURACY;
+    } else if (wave <= 7) {
+      return Bullet.MEDIUM_ACCURACY; 
+    } else {
+      return Bullet.HIGH_ACCURACY; 
+    }
   }
 }
 

@@ -23,6 +23,7 @@ public class Wave {
     advanceEnemies();
     drawEnemies();
     drawEnemyHealthBars();
+    drawBullets();
   }
   
   private void createEnemies() {
@@ -34,21 +35,21 @@ public class Wave {
       if (enemySpawnsOnSide) {
         yPos = random(0, height);
         final boolean enemySpawnsOnLeft = randomBoolean();
-        xPos = enemySpawnsOnLeft ? random(-400, -100) : random(width + 100, width + 400);
+        xPos = enemySpawnsOnLeft ? random(-200, -75) : random(width + 75, width + 200);
       } else {
         xPos = random(0, height);
         final boolean enemySpawnsOnTop = randomBoolean();
-        yPos = enemySpawnsOnTop ? random(-400, -100) : random(height + 100, height + 400);
+        yPos = enemySpawnsOnTop ? random(-200, -75) : random(height + 75, height + 200);
       }
       
-      enemies.add(new Enemy(this.waveNum, id, xPos, yPos));
+      enemies.add(new Enemy(game, waveNum, id, xPos, yPos));
     }
   }
   
   private void advanceEnemies() {
     for (final Enemy e : enemies) {
       if (enemyIsOnScreen(e)) {
-        e.advanceToNearestPlayer(game.getPlayers());
+        e.makeBestMovement(game.getPlayers());
       } else {
         e.advanceOntoScreen();
       }
@@ -82,6 +83,12 @@ public class Wave {
   private void drawEnemyHealthBars() {
     for (final Enemy e : enemies) {
       e.displayHealthBar();
+    } 
+  }
+  
+  private void drawBullets() {
+    for (final Enemy e : enemies) {
+      e.displayActiveBullets();
     } 
   }
 }
