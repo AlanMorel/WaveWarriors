@@ -1,6 +1,7 @@
 public abstract class Entity {
 
   protected float x, y;
+  protected int maxHp;
   protected int hp;
   protected int radius;
 
@@ -8,11 +9,12 @@ public abstract class Entity {
     this.x = x;
     this.y = y;
     this.hp = hp;
+    this.maxHp = hp;
     this.radius = diameter / 2;
   }
 
   public boolean isDead() {
-    return hp > 0;
+    return hp <= 0;
   }
 }
 

@@ -1,34 +1,33 @@
 public class Game {
 
   private PImage background;
-  private int numPlayers;
-  private Player[] players;
+  public Player[] players;
   private boolean paused;
+  
   private Wave wave;
   private int waveLevel;
-  
+
   public static final int FIRST_WAVE_LEVEL = 3;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
 
     this.background = loadImage("gamebackground.png");
-    this.numPlayers = 0;
     this.players = new Player[4];
 
     if (player1) {
-      this.players[numPlayers++] = new Player(1, 100, 100);
+      this.players[0] = new Player(1, 100, 100, false);
     }
 
     if (player2) {
-      this.players[numPlayers++] = new Player(2, 500, 100);
+      this.players[1] = new Player(2, 1100, 100, true);
     }
 
     if (player3) {
-      this.players[numPlayers++] = new Player(3, 100, 500);
+      this.players[2] = new Player(3, 100, 500, false);
     }
 
     if (player4) {
-      this.players[numPlayers++] = new Player(4, 500, 500);
+      this.players[3] = new Player(4, 1100, 500, false);
     }
 
     this.paused = false;
@@ -52,21 +51,33 @@ public class Game {
         players[id].update();
       }
     }
+
+    wave.update();
+
+    checkCollisions();
   }
 
   public void draw() {
     image(background, 0, 0);
+
+    wave.draw();
 
     for (int id = 0; id < 4; id++) {
       if (players[id] != null) {
         players[id].draw();
       }
     }
-      
-    wave.display();
 
     if (paused) {
       drawPauseMenu();
+    }
+  }
+
+  void mouseClicked() {
+    for (int id = 0; id < 4; id++) {
+      if (players[id] != null) {
+        players[id].shoot();
+      }
     }
   }
 
@@ -80,9 +91,52 @@ public class Game {
     fill(255, 255);
     text("Game Paused", width / 2, height / 2);
   }
-  
-  public Player[] getPlayers() {
-    return (Player[])players.clone();
+
+  public void checkCollisions() {
+    checkPlayerBulletCollisions();
+    checkEnemyBulletCollisions();
+  }
+
+  public void checkPlayerBulletCollisions() {
+    for (int id = 0; id < 4; id++) {
+      if (players[id] != null) {
+        ArrayList<Bullet2> toRemove = new ArrayList<Bullet2>();
+        for (Bullet2 bullet : players[id].bullets) {
+          for (Enemy enemy : wave.enemies) {
+            if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
+              enemy.hit();
+              toRemove.add(bullet);
+            }
+          }
+        }
+        for (Bullet2 bullet : toRemove) {
+          players[id].bullets.remove(bullet);
+        }
+      }
+    }
+  }
+
+  public void checkEnemyBulletCollisions() {
+    for (Enemy enemy : wave.enemies) {
+      ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
+      for (Bullet bullet : enemy.bullets) {
+        for (int id = 0; id < 4; id++) {
+          if (players[id] != null) {
+            if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, players[id].x, players[id].y, players[id].radius)) {
+              players[id].hit();
+              toRemove.add(bullet);
+            }
+          }
+        }
+      }
+      for (Bullet bullet : toRemove) {
+          enemy.bullets.remove(bullet);
+        }
+    }
+  }
+
+  public boolean collided(float x1, float y1, float r1, float x2, float y2, float r2) {
+    return dist(x1, y1, x2, y2) < r1 + r2;
   }
 }
 

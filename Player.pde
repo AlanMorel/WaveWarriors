@@ -1,14 +1,28 @@
 public class Player extends Entity {
 
-  private int id;
+  public int id;
+  public ArrayList<Bullet2> bullets;
+  public int speed;
+  public boolean down;
 
-  public Player(int id, int x, int y) {
-    super(x, y, 100, 75);
+  public Player(int id, int x, int y, boolean down) {
+    super(x, y, 10, 75);
     this.id = id;
+    this.bullets = new ArrayList<Bullet2>();
+    this.speed = 3;
+    this.down = down;
   }
 
   public void update() {
-    int speed = 3;
+
+    for (Bullet2 bullet : bullets) {
+      bullet.update();
+    }
+
+    if (down) {
+      hit();
+      return;
+    }
 
     if (keys[UP] || keys['W']) {
       y-= speed;
@@ -27,6 +41,17 @@ public class Player extends Entity {
     }
 
     correctBounds();
+  }
+
+  public void shoot() {
+    if (down) {
+      return;
+    }
+
+    double angle = Math.atan2(mouseY - y, mouseX - x) * 180.0 / Math.PI;
+
+    Bullet2 bullet = new Bullet2(x, y, (float) angle, 52, 152, 219);
+    bullets.add(bullet);
   }
 
   public void correctBounds() {
@@ -48,24 +73,90 @@ public class Player extends Entity {
   }
 
   public void draw() {
+    if (down) {
+      drawEffect();
+    }
     drawPlayer();
     drawNameTag();
+    drawCursor();
+    drawHpBar();
+    for (Bullet2 bullet : bullets) {
+      bullet.draw();
+    }
+  }
+
+  public void hit() {
+    hp--;
+    if (hp <= 0) {
+      down = true;
+      hp = 0;
+    }
+  }
+
+  public void respawn() {
+    hp = maxHp;
+    down = false;
+  }
+
+  public void drawHpBar() {
+    int hpBarX = id * 325 - 175;
+
+    textSize(18);
+    fill(0);
+    text("Player " + id, hpBarX, height - 40);
+
+    rectMode(CORNER);
+    rect(hpBarX - 75, height - 30, 150, 15, 3);
+
+    if (down) {
+      fill(255 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5);
+      rect(hpBarX - 75, height - 30, 150, 15, 3);
+    } else {
+      setHPBarColor();
+      rect(hpBarX - 75, height - 30, 150 * hp / maxHp, 15, 3);
+    }
+  }
+
+  private void setHPBarColor() {
+    float percent = hp * 100 / maxHp;
+    if (percent < 30) {
+      fill(255, 102, 102);
+    } else if (percent < 60) {
+      fill(241, 196, 15);
+    } else {
+      fill(77, 255, 136);
+    }
+  }
+
+  private void drawCursor() {
+    noCursor();
+    fill(0);
+    ellipse(mouseX, mouseY, 1, 1);
   }
 
   private void drawPlayer() {
-    fill(0, 0, 0, 100);
     stroke(0, 0, 0, 255);
     strokeWeight(2);
-
+    if (down) {
+      fill(255, 102, 102);
+    } else {
+      fill(41, 128, 185, 255);
+    }
     ellipse(x, y, radius * 2, radius  * 2);
+  }
+
+  private void drawEffect() {
+    noStroke();
+    fill(255, 102, 102, 200 - (frameCount % 50) * 4);
+    ellipse(x, y, radius * 2 + (frameCount % 50) * 4, radius * 2 + (frameCount % 50) * 4);
   }
 
   private void drawNameTag() {
     fill(0, 0, 0, 255);
     textAlign(CENTER);
-    textSize(16);
-    
-    text("Player " + id, x, y + 55);
+    textSize(24);
+
+    text(id, x, y + 10);
   }
 }
 

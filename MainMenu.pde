@@ -107,7 +107,7 @@ public class MainMenu {
   }
 
   private boolean isPlayer2Ready() {
-    return false;
+    return true;
   }
 
   private boolean isPlayer3Ready() {

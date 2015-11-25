@@ -1,94 +1,93 @@
 public class Wave {
-  private boolean isDefeated;
-  private Game game;
-  private int waveNum;
-  private int numEnemies;
-  private ArrayList<Enemy> enemies;
   
+  private Game game;
+  private boolean isDefeated;
+  public ArrayList<Enemy> enemies;
+
   public static final int BASE_NUMBER_OF_ENEMIES = 2;
   public static final float ENEMIES_PER_WAVE_FACTOR = 3.0;
- 
-  Wave(final Game game, final int waveNum) {
+
+  public Wave(final Game game, final int waveNum) {
     this.game = game;
-    final boolean waveNumIsValid = waveNum >= 1;  // Wave number must be positive
     this.isDefeated = false;
-    this.waveNum = waveNumIsValid ? waveNum: 1;
-    this.numEnemies = BASE_NUMBER_OF_ENEMIES + (int)(waveNum*ENEMIES_PER_WAVE_FACTOR);
     this.enemies = new ArrayList<Enemy>();
-    createEnemies();
+    createEnemies(waveNum);
   }
-  
-  public void display() {
+
+  public void update() {
     removeDeadEnemies();
     advanceEnemies();
+  }
+
+  public void draw() {
     drawEnemies();
     drawEnemyHealthBars();
     drawBullets();
   }
-  
-  private void createEnemies() {
-    for (int id = 0; id < numEnemies; id++) {
+
+  private void createEnemies(int waveNum) {
+    for (int id = 0; id < BASE_NUMBER_OF_ENEMIES + (int) (waveNum*ENEMIES_PER_WAVE_FACTOR); id++) {
       float xPos = -1;
       float yPos = -1;
+
+      boolean enemySpawnsOnSide = randomBoolean();
       
-      final boolean enemySpawnsOnSide = randomBoolean();
       if (enemySpawnsOnSide) {
         yPos = random(0, height);
-        final boolean enemySpawnsOnLeft = randomBoolean();
-        xPos = enemySpawnsOnLeft ? random(-200, -75) : random(width + 75, width + 200);
+        boolean left = randomBoolean();
+        xPos = left ? random(-200, -75) : random(width + 75, width + 200);
       } else {
         xPos = random(0, height);
-        final boolean enemySpawnsOnTop = randomBoolean();
-        yPos = enemySpawnsOnTop ? random(-200, -75) : random(height + 75, height + 200);
+        boolean top = randomBoolean();
+        yPos = top ? random(-200, -75) : random(height + 75, height + 200);
       }
-      
-      enemies.add(new Enemy(game, waveNum, id, xPos, yPos));
+
+      enemies.add(new Enemy(waveNum, xPos, yPos));
     }
   }
-  
+
   private void advanceEnemies() {
-    for (final Enemy e : enemies) {
-      if (enemyIsOnScreen(e)) {
-        e.makeBestMovement(game.getPlayers());
+    for (Enemy enemy : enemies) {
+      if (enemy.isOnScreen()) {
+        enemy.makeBestMovement(game.players);
       } else {
-        e.advanceOntoScreen();
+        enemy.advanceToScreen();
       }
     }
   }
-  
+
   private boolean randomBoolean() {
-    return random(100) > 50;
+    return random(1) > .5;
   }
-  
-  private boolean enemyIsOnScreen(final Enemy e) {
-    final boolean withinVerticalSides = (e.x > (e.radius + 10)) && (e.x < width - (e.radius + 10));
-    final boolean withinHorizontalSides = (e.y > (e.radius + 10)) && (e.y < height - (e.radius + 10));
-    return withinVerticalSides && withinHorizontalSides;
-  }
-  
+
   private void removeDeadEnemies() {
-    for (final Enemy e : enemies) {
-      if (e.noHealthLeft()) {
-        enemies.remove(e); 
+    ArrayList<Enemy> toRemove = new ArrayList<Enemy>();
+    for (Enemy enemy : enemies) {
+      if (enemy.isDead()) {
+        toRemove.add(enemy);
       }
     }
-  }
-  
-  private void drawEnemies() {
-    for (final Enemy e : enemies) {
-      e.draw(); 
+    for (Enemy enemy : toRemove) {
+      enemies.remove(enemy);
     }
   }
-  
-  private void drawEnemyHealthBars() {
-    for (final Enemy e : enemies) {
-      e.displayHealthBar();
-    } 
+
+  private void drawEnemies() {
+    for (Enemy enemy : enemies) {
+      enemy.draw();
+    }
   }
-  
+
+  private void drawEnemyHealthBars() {
+    for (Enemy enemy : enemies) {
+      enemy.displayHealthBar();
+    }
+  }
+
   private void drawBullets() {
-    for (final Enemy e : enemies) {
-      e.displayActiveBullets();
-    } 
+    for (Enemy enemy : enemies) {
+      enemy.drawBullets();
+    }
   }
 }
+
