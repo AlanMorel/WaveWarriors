@@ -48,11 +48,6 @@ public class Bullet {
     ellipse(x, y, BULLET_RADIUS, BULLET_RADIUS);
   }
 
-  /** The enemy will shoot towards a point on the line perpendicular to the line 
-   * between the enemy and the player. The point towards which the bullet will 
-   * fire is determined by it's accuracy. A higher accuracy ensures a greater 
-   * chance of the point being within the player. 
-   */
   public void fireAtPlayer(final Player player) {
     if (isFiring == false) {
 
@@ -63,15 +58,15 @@ public class Bullet {
       float targetY = player.y;
 
       if ((accuracy == LOW_ACCURACY) && (range > LOW_ACCURACY_CERTAIN_HIT_RANGE)) {
-        targetX = player.x + LOW_ACCURACY_MARGIN_OF_ERROR;
-        targetY = player.y + LOW_ACCURACY_MARGIN_OF_ERROR;
+        targetX = player.x + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
+        targetY = player.y + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
       } else if ((accuracy == MEDIUM_ACCURACY) && (range > MEDIUM_ACCURACY_CERTAIN_HIT_RANGE)) {
-        targetX = player.x + MEDIUM_ACCURACY_MARGIN_OF_ERROR;
-        targetY = player.y + MEDIUM_ACCURACY_MARGIN_OF_ERROR;
+        targetX = player.x + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
+        targetY = player.y + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
       } else if ((accuracy == HIGH_ACCURACY) && (range > HIGH_ACCURACY_CERTAIN_HIT_RANGE)) {
-        targetX = player.x + HIGH_ACCURACY_MARGIN_OF_ERROR;
-        targetY = player.y + HIGH_ACCURACY_MARGIN_OF_ERROR;
-      } 
+        targetX = player.x + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+        targetY = player.y + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+      }
 
       float deltaX = x - targetX;
       float deltaY = y - targetY; 
