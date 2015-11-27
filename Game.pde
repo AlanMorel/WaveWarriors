@@ -60,17 +60,13 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-
-    for (int id = 0; id < 4; id++) {
-      if (players[id] != null) {
-        players[id].draw();
-      }
-    }
     
     if (wave.isDefeated()) {
       this.wave = new Wave(this, ++waveLevel);
       healAllPlayers();
     }
+    
+    drawPlayers();
     wave.draw();
 
     if (paused) {
@@ -148,6 +144,14 @@ public class Game {
     for (final Player p : players) {
       p.respawn();
     } 
+  }
+  
+  private void drawPlayers() {
+    for (int id = 0; id < 4; id++) {
+      if (players[id] != null) {
+        players[id].draw();
+      }
+    }
   }
 }
 

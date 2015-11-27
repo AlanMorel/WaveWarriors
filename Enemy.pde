@@ -71,7 +71,7 @@ public class Enemy extends Entity {
   public void fireAtNearestPlayer() {
     Player nearestPlayer = getNearestPlayer();
 
-    Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy());
+    Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy(), rFillColor, gFillColor, bFillColor);
     bullets.add(bullet);
     bullet.fireAtPlayer(nearestPlayer);
   }
