@@ -1,7 +1,6 @@
 public class Wave {
   
   private Game game;
-  private boolean isDefeated;
   public ArrayList<Enemy> enemies;
 
   public static final int BASE_NUMBER_OF_ENEMIES = 2;
@@ -9,7 +8,6 @@ public class Wave {
 
   public Wave(final Game game, final int waveNum) {
     this.game = game;
-    this.isDefeated = false;
     this.enemies = new ArrayList<Enemy>();
     createEnemies(waveNum);
   }
@@ -88,6 +86,10 @@ public class Wave {
     for (Enemy enemy : enemies) {
       enemy.drawBullets();
     }
+  }
+  
+  public boolean isDefeated() {
+    return enemies.size() == 0;
   }
 }
 

@@ -60,13 +60,16 @@ public class Game {
   public void draw() {
     image(background, 0, 0);
 
-    wave.draw();
-
     for (int id = 0; id < 4; id++) {
       if (players[id] != null) {
         players[id].draw();
       }
     }
+    
+    if (wave.isDefeated()) {
+      this.wave = new Wave(this, ++waveLevel); 
+    }
+    wave.draw();
 
     if (paused) {
       drawPauseMenu();
