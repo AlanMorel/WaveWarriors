@@ -153,10 +153,12 @@ public class Enemy extends Entity {
     rectMode(CORNER);
 
     fill(255, 102, 102);
-    rect(hpBarX, hpBarY, maxHp * HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
+    final float barWidth = maxHp * HP_BAR_WIDTH_FACTOR;
+    rect(hpBarX - barWidth/2, hpBarY, barWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
 
     fill(77, 255, 136);
-    rect(hpBarX, hpBarY, hp * HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
+    final float remainingHealthWidth = hp * HP_BAR_WIDTH_FACTOR;
+    rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
   public void hit() {
