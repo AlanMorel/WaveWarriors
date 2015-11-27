@@ -8,11 +8,12 @@ public class Game {
   private int waveLevel;
 
   public static final int FIRST_WAVE_LEVEL = 3;
+  public static final int MAX_NUMBER_OF_PLAYERS = 4;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
 
     this.background = loadImage("gamebackground.png");
-    this.players = new Player[4];
+    this.players = new Player[MAX_NUMBER_OF_PLAYERS];
 
     if (player1) {
       this.players[0] = new Player(1, 100, 100, false);
@@ -59,14 +60,14 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-
-    wave.draw();
-
-    for (int id = 0; id < 4; id++) {
-      if (players[id] != null) {
-        players[id].draw();
-      }
+    
+    if (wave.isDefeated()) {
+      this.wave = new Wave(this, ++waveLevel);
+      healAllPlayers();
     }
+    
+    drawPlayers();
+    wave.draw();
 
     if (paused) {
       drawPauseMenu();
@@ -137,6 +138,20 @@ public class Game {
 
   public boolean collided(float x1, float y1, float r1, float x2, float y2, float r2) {
     return dist(x1, y1, x2, y2) < r1 + r2;
+  }
+  
+  private void healAllPlayers() {
+    for (final Player p : players) {
+      p.respawn();
+    } 
+  }
+  
+  private void drawPlayers() {
+    for (int id = 0; id < 4; id++) {
+      if (players[id] != null) {
+        players[id].draw();
+      }
+    }
   }
 }
 

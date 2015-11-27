@@ -57,16 +57,6 @@ public class Enemy extends Entity {
     updateShootingStatus();
   }
 
-  public void retreatFromNearestPlayer() {
-    final Player nearestPlayer = getNearestPlayer();
-    final float deltaY = y - (nearestPlayer.y + yTargetOffset);
-    final float deltaX = x - (nearestPlayer.x + xTargetOffset);
-    final float direction  = atan2(deltaY, deltaX);
-
-    x = constrain(x + (speed*cos(direction)), (radius + 11), width - (radius + 11));
-    y = constrain(y + (speed*sin(direction)), (radius + 11), height - (radius + 11));
-  }
-
   public void updateFireDelay() {
     fireDelay = (int)random(100, 300);
   }
@@ -81,7 +71,7 @@ public class Enemy extends Entity {
   public void fireAtNearestPlayer() {
     Player nearestPlayer = getNearestPlayer();
 
-    Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy());
+    Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy(), rFillColor, gFillColor, bFillColor);
     bullets.add(bullet);
     bullet.fireAtPlayer(nearestPlayer);
   }
@@ -119,14 +109,14 @@ public class Enemy extends Entity {
     Player closestPlayer = game.players[0];
     float minDistance = dist(x, y, closestPlayer.x, closestPlayer.y);
 
-    for (int id = 0; id < 4; id++) {
-      if (game.players[id] == null) {
+    for (int i = 0; i < game.players.length; i++) {
+      if ((game.players[i] == null) || (game.players[i].down)) {
         continue;
       }
-      float distanceFromPlayer = dist(x, y, game.players[id].x, game.players[id].y);
+      float distanceFromPlayer = dist(x, y, game.players[i].x, game.players[i].y);
       if (distanceFromPlayer < minDistance) {
         minDistance = distanceFromPlayer;
-        closestPlayer = game.players[id];
+        closestPlayer = game.players[i];
       }
     }
 
@@ -163,10 +153,12 @@ public class Enemy extends Entity {
     rectMode(CORNER);
 
     fill(255, 102, 102);
-    rect(hpBarX, hpBarY, maxHp * HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
+    final float barWidth = maxHp * HP_BAR_WIDTH_FACTOR;
+    rect(hpBarX - barWidth/2, hpBarY, barWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
 
     fill(77, 255, 136);
-    rect(hpBarX, hpBarY, hp * HP_BAR_WIDTH_FACTOR, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
+    final float remainingHealthWidth = hp * HP_BAR_WIDTH_FACTOR;
+    rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
   public void hit() {
