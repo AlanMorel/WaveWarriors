@@ -1,13 +1,12 @@
 public class Wave {
-  
-  private Game game;
   public ArrayList<Enemy> enemies;
 
   public static final int BASE_NUMBER_OF_ENEMIES = 2;
   public static final float ENEMIES_PER_WAVE_FACTOR = 3.0;
+  public static final int MAXIMUM_DISTANCE_AWAY_FROM_SCREEN = 600;
+  public static final int MINIMUM_DISTANCE_AWAY_FROM_SCREEN = 75;
 
-  public Wave(final Game game, final int waveNum) {
-    this.game = game;
+  public Wave(final int waveNum) {
     this.enemies = new ArrayList<Enemy>();
     createEnemies(waveNum);
   }
@@ -28,16 +27,17 @@ public class Wave {
       float xPos = -1;
       float yPos = -1;
 
-      boolean enemySpawnsOnSide = randomBoolean();
-      
+      final boolean enemySpawnsOnSide = randomBoolean();
       if (enemySpawnsOnSide) {
         yPos = random(0, height);
-        boolean left = randomBoolean();
-        xPos = left ? random(-200, -75) : random(width + 75, width + 200);
+        final boolean left = randomBoolean();
+        xPos = left ? random(-MAXIMUM_DISTANCE_AWAY_FROM_SCREEN, -MINIMUM_DISTANCE_AWAY_FROM_SCREEN) : 
+            random(width + MINIMUM_DISTANCE_AWAY_FROM_SCREEN, width + MAXIMUM_DISTANCE_AWAY_FROM_SCREEN);
       } else {
         xPos = random(0, height);
-        boolean top = randomBoolean();
-        yPos = top ? random(-200, -75) : random(height + 75, height + 200);
+        final boolean top = randomBoolean();
+        yPos = top ? random(-MAXIMUM_DISTANCE_AWAY_FROM_SCREEN, -MINIMUM_DISTANCE_AWAY_FROM_SCREEN) : 
+            random(height + MINIMUM_DISTANCE_AWAY_FROM_SCREEN, height + MAXIMUM_DISTANCE_AWAY_FROM_SCREEN);
       }
 
       enemies.add(new Enemy(waveNum, xPos, yPos));

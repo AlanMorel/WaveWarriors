@@ -29,9 +29,10 @@ public class Enemy extends Entity {
   public static final int ENEMY_RADIUS = 50;
   public static final float MAX_COLOR_VALUE = 90;
 
-  public static final float SPEED_FACTOR = 1.1;
-  public static final float SPEED_TO_REACH_SCREEN_FACTOR = 1.4;
-  public static final float SPEED_WILDCARD = 0.4;
+  public static final float WAVE_SPEED_FACTOR = 1.1;
+  public static final float SPEED_TO_REACH_SCREEN = 0.8;
+  public static final float MINIMUM_SPEED = 0.1;
+  public static final float MAXIMUM_SPEED = 1;
   
   public static final int MAGAZINE_CAPACITY = 15;
   
@@ -55,7 +56,8 @@ public class Enemy extends Entity {
 
   public Enemy(final int wave, final float x, final float y) {
     super(x, y, BASE_HEALTH + wave * HEALTH_FACTOR, ENEMY_RADIUS);
-    this.speed = random(-SPEED_WILDCARD * wave, SPEED_WILDCARD * wave) * SPEED_FACTOR;
+    this.speed = (random(MINIMUM_SPEED, MAXIMUM_SPEED) * wave);
+    println("Enemy speed:" + speed);
     this.wave = wave;
     
     this.rFillColor = random(MAX_COLOR_VALUE);
@@ -174,15 +176,15 @@ public class Enemy extends Entity {
 
   private void advanceToScreen() {
     if (x < (radius + 10)) {
-      x += speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      x += SPEED_TO_REACH_SCREEN;
     } else if (x > width - (radius + 10)) {
-      x -= speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      x -= SPEED_TO_REACH_SCREEN;
     }
 
     if (y < (radius + 10)) {
-      y += speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      y += SPEED_TO_REACH_SCREEN;
     } else if (y > height - (radius + 10)) {
-      y -= speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      y -= SPEED_TO_REACH_SCREEN;
     }
   }
 
