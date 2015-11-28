@@ -13,15 +13,14 @@ public class Wave {
   }
 
   public void update() {
-    removeDeadEnemies();
-    advanceEnemies();
+    updateEnemies();
     updateFiredBullets();
   }
 
-  public void draw() {
-    drawEnemies();
-    drawEnemyHealthBars();
-    drawBullets();
+  public void display() {
+    displayEnemies();
+    displayEnemyHealthBars();
+    displayFiredBullets();
   }
 
   private void createEnemies(int waveNum) {
@@ -45,12 +44,13 @@ public class Wave {
     }
   }
 
-  private void advanceEnemies() {
-    for (final Enemy enemy : enemies) {
-      if (enemy.isOnScreen()) {
-        enemy.makeBestMovement(game.players);
+  private void updateEnemies() {
+    removeDeadEnemies();
+    for (final Enemy e : enemies) {
+      if (e.isOnScreen()) {
+        e.update();
       } else {
-        enemy.advanceToScreen();
+        e.advanceToScreen();
       }
     }
   }
@@ -60,39 +60,37 @@ public class Wave {
   }
 
   private void removeDeadEnemies() {
-    ArrayList<Enemy> toRemove = new ArrayList<Enemy>();
-    for (Enemy enemy : enemies) {
-      if (enemy.isDead()) {
-        toRemove.add(enemy);
+    final ArrayList<Enemy> deadEnemies = new ArrayList<Enemy>();
+    for (final Enemy e : enemies) {
+      if (e.isDead()) {
+        deadEnemies.add(e);
       }
     }
-    for (Enemy enemy : toRemove) {
-      enemies.remove(enemy);
+    enemies.removeAll(deadEnemies);
+  }
+
+  private void displayEnemies() {
+    for (final Enemy e : enemies) {
+      e.display();
     }
   }
 
-  private void drawEnemies() {
-    for (Enemy enemy : enemies) {
-      enemy.draw();
-    }
-  }
-
-  private void drawEnemyHealthBars() {
+  private void displayEnemyHealthBars() {
     for (Enemy enemy : enemies) {
       enemy.displayHealthBar();
     }
   }
 
-  private void drawBullets() {
+  private void displayFiredBullets() {
     for (final Enemy e : enemies) {
-      e.drawFiredBullets();
+      e.displayFiredBullets();
     }
   }
   
   private void updateFiredBullets() {
     for (final Enemy e : enemies) {
       for (final Bullet b : e.getFiredBullets()) {
-        b.updatePosition(); 
+        b.update(); 
       }
     } 
   }

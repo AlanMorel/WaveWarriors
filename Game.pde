@@ -67,7 +67,7 @@ public class Game {
     }
     
     drawPlayers();
-    wave.draw();
+    wave.display();
 
     if (paused) {
       drawPauseMenu();

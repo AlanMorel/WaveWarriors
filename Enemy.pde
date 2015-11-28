@@ -70,8 +70,15 @@ public class Enemy extends Entity {
     updateFireDelay();
     setNewTargetPosition();
   }
+  
+  public void display() {
+    fill(rFillColor, gFillColor, bFillColor);
+    stroke(0);
+    strokeWeight(3);
+    ellipse(x, y, radius*2, radius*2);
+  }
 
-  public void makeBestMovement(final Player[] players) {
+  public void update() {
     if (magazine.isEmpty()) {
       reloadMagazine(magazine); 
     }
@@ -97,8 +104,8 @@ public class Enemy extends Entity {
 
   public void fireAtPlayer(final Player player) {
     if (magazine.isEmpty()) {
-      return;
-    } 
+      reloadMagazine(magazine); 
+    }
     
     float targetX = player.x;
     float targetY = player.y;
@@ -116,20 +123,12 @@ public class Enemy extends Entity {
     }
     float deltaX = x - targetX;
     float deltaY = y - targetY;
+    final float direction = atan2(deltaY, deltaX);
     
     final Bullet bullet = magazine.remove(magazine.size() - 1);
-    bullet.setX(x);
-    bullet.setY(y);
-    bullet.setDirection(atan2(deltaY, deltaX));
-    bullet.setSpeed(bulletSpeed);
+    bullet.setPosition(x, y);
+    bullet.setVelocity(bulletSpeed, direction);
     firedBullets.add(bullet);
-  }
-
-  public void draw() {
-    fill(rFillColor, gFillColor, bFillColor);
-    stroke(0);
-    strokeWeight(3);
-    ellipse(x, y, radius*2, radius*2);
   }
   
   public void advanceToNearestAlivePlayer() {
@@ -214,9 +213,9 @@ public class Enemy extends Entity {
     hp -= 1;
   }
 
-  public void drawFiredBullets() {
+  public void displayFiredBullets() {
     for (final Bullet b : firedBullets) {
-      b.draw();
+      b.display();
     }
   }
 

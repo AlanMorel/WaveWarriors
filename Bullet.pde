@@ -2,11 +2,10 @@ public class Bullet {
 
   // Determined (i.e., set) only when fired
   private float direction;  
+  private float speed;
   private float x;
   private float y;
 
-  private boolean hasBeenFired;
-  private float speed;
   private float red;
   private float green;
   private float blue;
@@ -19,32 +18,25 @@ public class Bullet {
     this.blue = blue;
   }
 
-  public void draw() {
-    updatePosition();
+  public void display() {
     ellipseMode(CENTER);
     fill(red, green, blue);
     noStroke();
     ellipse(x, y, BULLET_RADIUS, BULLET_RADIUS);
   }
 
-  public void updatePosition() {
+  public void update() {
     x -= speed*cos(direction);
     y -= speed*sin(direction);
   }
   
-  public void setDirection(final float direction) {
+  public void setVelocity(final float speed, final float direction) {
+    this.speed = speed; 
     this.direction = direction;
   }
   
-  public void setSpeed(final float speed) {
-    this.speed = speed; 
-  }
-  
-  public void setX(final float x) {
+  public void setPosition(final float x, final float y) {
     this.x = x;
-  }
-  
-  public void setY(final float y) {
     this.y = y; 
   }
 }
