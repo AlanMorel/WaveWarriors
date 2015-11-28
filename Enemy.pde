@@ -15,7 +15,11 @@ public class Enemy extends Entity {
   private float gFillColor;
   private float bFillColor;
 
+<<<<<<< HEAD
   private ArrayList<Bullet> bullets;
+=======
+  private ArrayList<Bullet> firedBullets;
+>>>>>>> origin/master
   private ArrayList<Bullet> magazine;
   private int fireDelay;
   private float bulletSpeed;
@@ -33,9 +37,15 @@ public class Enemy extends Entity {
   public static final float SPEED_TO_REACH_SCREEN = 0.8;
   public static final float MINIMUM_SPEED = 0.1;
   public static final float MAXIMUM_SPEED = 1;
+<<<<<<< HEAD
 
   public static final int MAGAZINE_CAPACITY = 15;
 
+=======
+  
+  public static final int MAGAZINE_CAPACITY = 15;
+  
+>>>>>>> origin/master
   public static final int LOW_ACCURACY = 1;
   public static final int MEDIUM_ACCURACY = 2;
   public static final int HIGH_ACCURACY = 3;
@@ -59,20 +69,35 @@ public class Enemy extends Entity {
     this.speed = (random(MINIMUM_SPEED, MAXIMUM_SPEED) * wave);
     println("Enemy speed:" + speed);
     this.wave = wave;
-
+    
     this.rFillColor = random(MAX_COLOR_VALUE);
     this.gFillColor = random(MAX_COLOR_VALUE);
     this.bFillColor = random(MAX_COLOR_VALUE);
 
     this.bulletSpeed = BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * wave);
+<<<<<<< HEAD
     this.bullets = new ArrayList<Bullet>();
     this.magazine = new ArrayList<Bullet>();
     reloadMagazine(magazine);
 
+=======
+    this.firedBullets = new ArrayList<Bullet>();
+    this.magazine = new ArrayList<Bullet>();
+    reloadMagazine(magazine);
+    
+>>>>>>> origin/master
     updateFireDelay();
     setNewTargetPosition();
   }
+  
+  public void display() {
+    fill(rFillColor, gFillColor, bFillColor);
+    stroke(0);
+    strokeWeight(3);
+    ellipse(x, y, radius*2, radius*2);
+  }
 
+<<<<<<< HEAD
   public void display() {
     fill(rFillColor, gFillColor, bFillColor);
     stroke(0);
@@ -83,6 +108,11 @@ public class Enemy extends Entity {
   public void update() {
     if (magazine.isEmpty()) {
       reloadMagazine(magazine);
+=======
+  public void update() {
+    if (magazine.isEmpty()) {
+      reloadMagazine(magazine); 
+>>>>>>> origin/master
     }
     advanceToNearestAlivePlayer();
     updateShootingStatus();
@@ -102,6 +132,7 @@ public class Enemy extends Entity {
   public void fireAtNearestAlivePlayer() {
     final Player nearestPlayer = getNearestAlivePlayer();
     fireAtPlayer(nearestPlayer);
+<<<<<<< HEAD
   }
 
   public void fireAtPlayer(final Player player) {
@@ -133,6 +164,39 @@ public class Enemy extends Entity {
     bullets.add(bullet);
   }
 
+=======
+  }
+
+  public void fireAtPlayer(final Player player) {
+    if (magazine.isEmpty()) {
+      reloadMagazine(magazine); 
+    }
+    
+    float targetX = player.x;
+    float targetY = player.y;
+    float range = dist(x, y, targetX, targetY);    
+
+    if ((getFiringAccuracy() == LOW_ACCURACY) && (range > LOW_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
+    } else if ((getFiringAccuracy() == MEDIUM_ACCURACY) && (range > MEDIUM_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
+    } else if ((getFiringAccuracy() == HIGH_ACCURACY) && (range > HIGH_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+    }
+    float deltaX = x - targetX;
+    float deltaY = y - targetY;
+    final float direction = atan2(deltaY, deltaX);
+    
+    final Bullet bullet = magazine.remove(magazine.size() - 1);
+    bullet.setPosition(x, y);
+    bullet.setVelocity(bulletSpeed, direction);
+    firedBullets.add(bullet);
+  }
+  
+>>>>>>> origin/master
   public void advanceToNearestAlivePlayer() {
     if (frameNumber++ >= framesBeforeUpdatingTarget) {
       setNewTargetPosition();
@@ -151,6 +215,7 @@ public class Enemy extends Entity {
   }
 
   private Player getNearestAlivePlayer() {
+<<<<<<< HEAD
     Player closestPlayer = game.players.get(0);
     float minDistance = Integer.MAX_VALUE;
     for (Player player : game.players) {
@@ -158,6 +223,15 @@ public class Enemy extends Entity {
         continue;
       }
       float distanceFromPlayer = dist(x, y, player.x, player.y);
+=======
+    Player closestPlayer = game.players[0];
+    float minDistance = Integer.MAX_VALUE;
+    for (int i = 0; i < game.players.length; i++) {
+      if ((game.players[i] == null) || (game.players[i].down)) {
+        continue;
+      }
+      final float distanceFromPlayer = dist(x, y, game.players[i].x, game.players[i].y);
+>>>>>>> origin/master
       if (distanceFromPlayer < minDistance) {
         minDistance = distanceFromPlayer;
         closestPlayer = player;
@@ -189,8 +263,13 @@ public class Enemy extends Entity {
   }
 
   private void reloadMagazine(final ArrayList<Bullet> magazine) {
+<<<<<<< HEAD
     while (magazine.size () < MAGAZINE_CAPACITY) {
       magazine.add(new Bullet(rFillColor, gFillColor, bFillColor));
+=======
+    while(magazine.size() < MAGAZINE_CAPACITY) {
+      magazine.add(new Bullet(rFillColor, gFillColor, bFillColor)); 
+>>>>>>> origin/master
     }
   }
 
@@ -215,9 +294,9 @@ public class Enemy extends Entity {
     hp -= 1;
   }
 
-  public void drawBullets() {
-    for (Bullet bullet : bullets) {
-      bullet.draw();
+  public void displayFiredBullets() {
+    for (final Bullet b : firedBullets) {
+      b.display();
     }
   }
 
@@ -229,6 +308,10 @@ public class Enemy extends Entity {
     } else {
       return HIGH_ACCURACY;
     }
+  }
+  
+  private ArrayList<Bullet> getFiredBullets() {
+    return firedBullets; 
   }
 
   private boolean isOnScreen() {

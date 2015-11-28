@@ -20,7 +20,7 @@ public class Bullet2 {
     this.blue = blue;
   }
 
-  public void draw() {
+  public void display() {
     ellipseMode(CENTER);
     fill(red, green, blue);
     noStroke();

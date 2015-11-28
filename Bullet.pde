@@ -18,7 +18,11 @@ public class Bullet {
     this.blue = blue;
   }
 
+<<<<<<< HEAD
   public void draw() {
+=======
+  public void display() {
+>>>>>>> origin/master
     ellipseMode(CENTER);
     fill(red, green, blue);
     noStroke();

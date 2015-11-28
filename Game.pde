@@ -53,6 +53,24 @@ public class Game {
     
     updateWave();
     checkCollisions();
+<<<<<<< HEAD
+=======
+  }
+  
+  private void updateWave() {
+    if (wave.isDefeated()) {
+      wave = new Wave(++waveLevel);
+    } 
+    wave.update();
+  }
+  
+  private void updatePlayers() {
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
+      if (players[id] != null) {
+        players[id].update();
+      }
+    } 
+>>>>>>> origin/master
   }
   
   private void updateWave() {
@@ -80,8 +98,15 @@ public class Game {
   }
 
   void mouseClicked() {
+<<<<<<< HEAD
     for (Player player : players) {
       player.shoot();
+=======
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
+      if (players[id] != null) {
+        players[id].shoot();
+      }
+>>>>>>> origin/master
     }
   }
 
@@ -102,6 +127,7 @@ public class Game {
   }
 
   public void checkPlayerBulletCollisions() {
+<<<<<<< HEAD
     for (Player player : players) {
       ArrayList<Bullet2> toRemove = new ArrayList<Bullet2>();
       for (Bullet2 bullet : player.bullets) {
@@ -109,6 +135,17 @@ public class Game {
           if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
             enemy.hit();
             toRemove.add(bullet);
+=======
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
+      if (players[id] != null) {
+        ArrayList<Bullet2> toRemove = new ArrayList<Bullet2>();
+        for (Bullet2 bullet : players[id].bullets) {
+          for (Enemy enemy : wave.enemies) {
+            if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
+              enemy.hit();
+              toRemove.add(bullet);
+            }
+>>>>>>> origin/master
           }
         }
       }
@@ -121,16 +158,30 @@ public class Game {
   public void checkEnemyBulletCollisions() {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
+<<<<<<< HEAD
       for (Bullet bullet : enemy.bullets) {
         for (Player player : players) {
           if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, player.x, player.y, player.radius)) {
             player.hit();
             toRemove.add(bullet);
+=======
+      for (Bullet bullet : enemy.getFiredBullets()) {
+        for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
+          if (players[id] != null) {
+            if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, players[id].x, players[id].y, players[id].radius)) {
+              players[id].hit();
+              toRemove.add(bullet);
+            }
+>>>>>>> origin/master
           }
         }
       }
       for (Bullet bullet : toRemove) {
+<<<<<<< HEAD
         enemy.bullets.remove(bullet);
+=======
+        enemy.getFiredBullets().remove(bullet);
+>>>>>>> origin/master
       }
     }
   }
@@ -152,8 +203,15 @@ public class Game {
   }
   
   private void drawPlayers() {
+<<<<<<< HEAD
     for (Player player : game.players) {
       player.draw();
+=======
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
+      if (players[id] != null) {
+        players[id].draw();
+      }
+>>>>>>> origin/master
     }
   }
 }

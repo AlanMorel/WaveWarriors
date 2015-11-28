@@ -13,13 +13,21 @@ public class Wave {
 
   public void update() {
     updateEnemies();
+<<<<<<< HEAD
     updateBullets();
+=======
+    updateFiredBullets();
+>>>>>>> origin/master
   }
 
   public void display() {
     displayEnemies();
     displayEnemyHealthBars();
+<<<<<<< HEAD
     displayBullets();
+=======
+    displayFiredBullets();
+>>>>>>> origin/master
   }
 
   private void createEnemies(int waveNum) {
@@ -61,17 +69,28 @@ public class Wave {
 
   private void removeDeadEnemies() {
     final ArrayList<Enemy> deadEnemies = new ArrayList<Enemy>();
+<<<<<<< HEAD
     for (Enemy enemy : enemies) {
       if (enemy.isDead()) {
         deadEnemies.add(enemy);
+=======
+    for (final Enemy e : enemies) {
+      if (e.isDead()) {
+        deadEnemies.add(e);
+>>>>>>> origin/master
       }
     }
     enemies.removeAll(deadEnemies);
   }
 
   private void displayEnemies() {
+<<<<<<< HEAD
     for (Enemy enemy : enemies) {
       enemy.display();
+=======
+    for (final Enemy e : enemies) {
+      e.display();
+>>>>>>> origin/master
     }
   }
 
@@ -81,6 +100,7 @@ public class Wave {
     }
   }
 
+<<<<<<< HEAD
   private void displayBullets() {
     for (Enemy enemy : enemies) {
       enemy.drawBullets();
@@ -91,6 +111,18 @@ public class Wave {
     for (Enemy enemy : enemies) {
       for (Bullet bullet : enemy.bullets) {
         bullet.update(); 
+=======
+  private void displayFiredBullets() {
+    for (final Enemy e : enemies) {
+      e.displayFiredBullets();
+    }
+  }
+  
+  private void updateFiredBullets() {
+    for (final Enemy e : enemies) {
+      for (final Bullet b : e.getFiredBullets()) {
+        b.update(); 
+>>>>>>> origin/master
       }
     } 
   }

@@ -141,12 +141,17 @@ public class Player extends Entity {
     drawCursor();
     drawBullets();
     drawHpBar();
+<<<<<<< HEAD
     drawRevivalSystem();
   }
 
   private void drawDownEffect() {
     if (!down) {
       return;
+=======
+    for (Bullet2 bullet : bullets) {
+      bullet.display();
+>>>>>>> origin/master
     }
     noStroke();
     fill(255, 102, 102, 200 - (frameCount % 50) * 4);
