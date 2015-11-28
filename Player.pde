@@ -81,7 +81,7 @@ public class Player extends Entity {
     drawCursor();
     drawHpBar();
     for (Bullet2 bullet : bullets) {
-      bullet.draw();
+      bullet.display();
     }
   }
 

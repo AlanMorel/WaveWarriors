@@ -15,11 +15,13 @@ public class Enemy extends Entity {
   private float gFillColor;
   private float bFillColor;
 
-  private ArrayList<Bullet> bullets;
+  private ArrayList<Bullet> firedBullets;
+  private ArrayList<Bullet> magazine;
   private int fireDelay;
+  private float bulletSpeed;
 
   public static final float BASE_BULLET_SPEED = 2;
-  public static final int BULLET_SPEED_FACTOR = 2;
+  public static final int BULLET_SPEED_FACTOR = 1;
 
   public static final int BASE_HEALTH = 5;
   public static final int HEALTH_FACTOR = 2;
@@ -27,9 +29,25 @@ public class Enemy extends Entity {
   public static final int ENEMY_RADIUS = 50;
   public static final float MAX_COLOR_VALUE = 90;
 
-  public static final float SPEED_FACTOR = 1.1;
-  public static final float SPEED_TO_REACH_SCREEN_FACTOR = 1.4;
-  public static final float SPEED_WILDCARD = 0.4;
+  public static final float WAVE_SPEED_FACTOR = 1.1;
+  public static final float SPEED_TO_REACH_SCREEN = 0.8;
+  public static final float MINIMUM_SPEED = 0.1;
+  public static final float MAXIMUM_SPEED = 1;
+  
+  public static final int MAGAZINE_CAPACITY = 15;
+  
+  public static final int LOW_ACCURACY = 1;
+  public static final int MEDIUM_ACCURACY = 2;
+  public static final int HIGH_ACCURACY = 3;
+
+  public static final int LOW_ACCURACY_MARGIN_OF_ERROR = 175;
+  public static final int MEDIUM_ACCURACY_MARGIN_OF_ERROR = 110;
+  public static final int HIGH_ACCURACY_MARGIN_OF_ERROR = 75;
+
+  // Players within these ranges will be hit with nearly 100% certainty.
+  public static final int LOW_ACCURACY_CERTAIN_HIT_RANGE = 250;
+  public static final int MEDIUM_ACCURACY_CERTAIN_HIT_RANGE = 400;
+  public static final int HIGH_ACCURACY_CERTAIN_HIT_RANGE = 550;
 
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
@@ -38,22 +56,35 @@ public class Enemy extends Entity {
 
   public Enemy(final int wave, final float x, final float y) {
     super(x, y, BASE_HEALTH + wave * HEALTH_FACTOR, ENEMY_RADIUS);
-
-    this.speed = random(-SPEED_WILDCARD * wave, SPEED_WILDCARD * wave) * SPEED_FACTOR;
+    this.speed = (random(MINIMUM_SPEED, MAXIMUM_SPEED) * wave);
+    println("Enemy speed:" + speed);
     this.wave = wave;
-
+    
     this.rFillColor = random(MAX_COLOR_VALUE);
     this.gFillColor = random(MAX_COLOR_VALUE);
     this.bFillColor = random(MAX_COLOR_VALUE);
 
-    bullets = new ArrayList<Bullet>();
+    this.bulletSpeed = BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * wave);
+    this.firedBullets = new ArrayList<Bullet>();
+    this.magazine = new ArrayList<Bullet>();
+    reloadMagazine(magazine);
+    
     updateFireDelay();
-
     setNewTargetPosition();
   }
+  
+  public void display() {
+    fill(rFillColor, gFillColor, bFillColor);
+    stroke(0);
+    strokeWeight(3);
+    ellipse(x, y, radius*2, radius*2);
+  }
 
-  public void makeBestMovement(final Player[] players) {
-    advanceToNearestPlayer();
+  public void update() {
+    if (magazine.isEmpty()) {
+      reloadMagazine(magazine); 
+    }
+    advanceToNearestAlivePlayer();
     updateShootingStatus();
   }
 
@@ -63,36 +94,51 @@ public class Enemy extends Entity {
 
   public void updateShootingStatus() {
     if ((--fireDelay == 0)) {
-      fireAtNearestPlayer();
+      fireAtNearestAlivePlayer();
       updateFireDelay();
     }
   }
 
-  public void fireAtNearestPlayer() {
-    Player nearestPlayer = getNearestPlayer();
-
-    Bullet bullet = new Bullet(x, y, BASE_BULLET_SPEED + wave*BULLET_SPEED_FACTOR, getBulletAccuracy(), rFillColor, gFillColor, bFillColor);
-    bullets.add(bullet);
-    bullet.fireAtPlayer(nearestPlayer);
+  public void fireAtNearestAlivePlayer() {
+    final Player nearestPlayer = getNearestAlivePlayer();
+    fireAtPlayer(nearestPlayer);
   }
 
-  public void draw() {
-    drawEnemy();
-  }
+  public void fireAtPlayer(final Player player) {
+    if (magazine.isEmpty()) {
+      reloadMagazine(magazine); 
+    }
+    
+    float targetX = player.x;
+    float targetY = player.y;
+    float range = dist(x, y, targetX, targetY);    
 
-  private void drawEnemy() {
-    fill(rFillColor, gFillColor, bFillColor);
-    stroke(0);
-    strokeWeight(3);
-    ellipse(x, y, radius*2, radius*2);
+    if ((getFiringAccuracy() == LOW_ACCURACY) && (range > LOW_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
+    } else if ((getFiringAccuracy() == MEDIUM_ACCURACY) && (range > MEDIUM_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
+    } else if ((getFiringAccuracy() == HIGH_ACCURACY) && (range > HIGH_ACCURACY_CERTAIN_HIT_RANGE)) {
+      targetX = player.x + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+      targetY = player.y + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
+    }
+    float deltaX = x - targetX;
+    float deltaY = y - targetY;
+    final float direction = atan2(deltaY, deltaX);
+    
+    final Bullet bullet = magazine.remove(magazine.size() - 1);
+    bullet.setPosition(x, y);
+    bullet.setVelocity(bulletSpeed, direction);
+    firedBullets.add(bullet);
   }
-
-  public void advanceToNearestPlayer() {
+  
+  public void advanceToNearestAlivePlayer() {
     if (frameNumber++ >= framesBeforeUpdatingTarget) {
       setNewTargetPosition();
     }
 
-    Player nearestPlayer = getNearestPlayer();
+    Player nearestPlayer = getNearestAlivePlayer();
     float deltaY = y - (nearestPlayer.y + yTargetOffset);
     float deltaX = x - (nearestPlayer.x + xTargetOffset);
     float direction  = atan2(deltaY, deltaX);
@@ -104,16 +150,14 @@ public class Enemy extends Entity {
     }
   }
 
-  private Player getNearestPlayer() {
-
+  private Player getNearestAlivePlayer() {
     Player closestPlayer = game.players[0];
-    float minDistance = dist(x, y, closestPlayer.x, closestPlayer.y);
-
+    float minDistance = Integer.MAX_VALUE;
     for (int i = 0; i < game.players.length; i++) {
       if ((game.players[i] == null) || (game.players[i].down)) {
         continue;
       }
-      float distanceFromPlayer = dist(x, y, game.players[i].x, game.players[i].y);
+      final float distanceFromPlayer = dist(x, y, game.players[i].x, game.players[i].y);
       if (distanceFromPlayer < minDistance) {
         minDistance = distanceFromPlayer;
         closestPlayer = game.players[i];
@@ -132,15 +176,21 @@ public class Enemy extends Entity {
 
   private void advanceToScreen() {
     if (x < (radius + 10)) {
-      x += speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      x += SPEED_TO_REACH_SCREEN;
     } else if (x > width - (radius + 10)) {
-      x -= speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      x -= SPEED_TO_REACH_SCREEN;
     }
 
     if (y < (radius + 10)) {
-      y += speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      y += SPEED_TO_REACH_SCREEN;
     } else if (y > height - (radius + 10)) {
-      y -= speed * SPEED_TO_REACH_SCREEN_FACTOR;
+      y -= SPEED_TO_REACH_SCREEN;
+    }
+  }
+
+  private void reloadMagazine(final ArrayList<Bullet> magazine) {
+    while(magazine.size() < MAGAZINE_CAPACITY) {
+      magazine.add(new Bullet(rFillColor, gFillColor, bFillColor)); 
     }
   }
 
@@ -165,20 +215,24 @@ public class Enemy extends Entity {
     hp -= 1;
   }
 
-  public void drawBullets() {
-    for (Bullet bullet : bullets) {
-      bullet.draw();
+  public void displayFiredBullets() {
+    for (final Bullet b : firedBullets) {
+      b.display();
     }
   }
 
-  public int getBulletAccuracy() {
+  public int getFiringAccuracy() {
     if (wave <= 3) {
-      return Bullet.LOW_ACCURACY;
+      return LOW_ACCURACY;
     } else if (wave <= 7) {
-      return Bullet.MEDIUM_ACCURACY;
+      return MEDIUM_ACCURACY;
     } else {
-      return Bullet.HIGH_ACCURACY;
+      return HIGH_ACCURACY;
     }
+  }
+  
+  private ArrayList<Bullet> getFiredBullets() {
+    return firedBullets; 
   }
 
   private boolean isOnScreen() {

@@ -7,7 +7,7 @@ public class Game {
   private Wave wave;
   private int waveLevel;
 
-  public static final int FIRST_WAVE_LEVEL = 3;
+  public static final int FIRST_WAVE_LEVEL = 1;
   public static final int MAX_NUMBER_OF_PLAYERS = 4;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
@@ -33,11 +33,10 @@ public class Game {
 
     this.paused = false;
     this.waveLevel = FIRST_WAVE_LEVEL;
-    this.wave = new Wave(this, waveLevel);
+    this.wave = new Wave(waveLevel);
   }
 
   public void update() {
-
     if (keys[BACKSPACE]) {
       paused = !paused;
       keys[BACKSPACE] = false;
@@ -47,27 +46,35 @@ public class Game {
       return;
     }
 
-    for (int id = 0; id < 4; id++) {
+    updatePlayers();
+    if (wave.isDefeated()) {
+      healAllPlayers(); 
+    }
+    
+    updateWave();
+    checkCollisions();
+  }
+  
+  private void updateWave() {
+    if (wave.isDefeated()) {
+      wave = new Wave(++waveLevel);
+    } 
+    wave.update();
+  }
+  
+  private void updatePlayers() {
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
       if (players[id] != null) {
         players[id].update();
       }
-    }
-
-    wave.update();
-
-    checkCollisions();
+    } 
   }
 
   public void draw() {
     image(background, 0, 0);
     
-    if (wave.isDefeated()) {
-      this.wave = new Wave(this, ++waveLevel);
-      healAllPlayers();
-    }
-    
     drawPlayers();
-    wave.draw();
+    wave.display();
 
     if (paused) {
       drawPauseMenu();
@@ -75,7 +82,7 @@ public class Game {
   }
 
   void mouseClicked() {
-    for (int id = 0; id < 4; id++) {
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
       if (players[id] != null) {
         players[id].shoot();
       }
@@ -99,7 +106,7 @@ public class Game {
   }
 
   public void checkPlayerBulletCollisions() {
-    for (int id = 0; id < 4; id++) {
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
       if (players[id] != null) {
         ArrayList<Bullet2> toRemove = new ArrayList<Bullet2>();
         for (Bullet2 bullet : players[id].bullets) {
@@ -120,8 +127,8 @@ public class Game {
   public void checkEnemyBulletCollisions() {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
-      for (Bullet bullet : enemy.bullets) {
-        for (int id = 0; id < 4; id++) {
+      for (Bullet bullet : enemy.getFiredBullets()) {
+        for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
           if (players[id] != null) {
             if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, players[id].x, players[id].y, players[id].radius)) {
               players[id].hit();
@@ -131,8 +138,8 @@ public class Game {
         }
       }
       for (Bullet bullet : toRemove) {
-          enemy.bullets.remove(bullet);
-        }
+        enemy.getFiredBullets().remove(bullet);
+      }
     }
   }
 
@@ -142,12 +149,14 @@ public class Game {
   
   private void healAllPlayers() {
     for (final Player p : players) {
-      p.respawn();
+      if (p != null) {
+        p.respawn();
+      }
     } 
   }
   
   private void drawPlayers() {
-    for (int id = 0; id < 4; id++) {
+    for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
       if (players[id] != null) {
         players[id].draw();
       }
