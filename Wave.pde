@@ -15,6 +15,7 @@ public class Wave {
   public void update() {
     removeDeadEnemies();
     advanceEnemies();
+    updateFiredBullets();
   }
 
   public void draw() {
@@ -45,7 +46,7 @@ public class Wave {
   }
 
   private void advanceEnemies() {
-    for (Enemy enemy : enemies) {
+    for (final Enemy enemy : enemies) {
       if (enemy.isOnScreen()) {
         enemy.makeBestMovement(game.players);
       } else {
@@ -83,9 +84,17 @@ public class Wave {
   }
 
   private void drawBullets() {
-    for (Enemy enemy : enemies) {
-      enemy.drawBullets();
+    for (final Enemy e : enemies) {
+      e.drawFiredBullets();
     }
+  }
+  
+  private void updateFiredBullets() {
+    for (final Enemy e : enemies) {
+      for (final Bullet b : e.getFiredBullets()) {
+        b.updatePosition(); 
+      }
+    } 
   }
   
   public boolean isDefeated() {

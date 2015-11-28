@@ -120,8 +120,8 @@ public class Game {
   public void checkEnemyBulletCollisions() {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
-      for (Bullet bullet : enemy.bullets) {
-        for (int id = 0; id < 4; id++) {
+      for (Bullet bullet : enemy.getFiredBullets()) {
+        for (int id = 0; id < MAX_NUMBER_OF_PLAYERS; id++) {
           if (players[id] != null) {
             if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, players[id].x, players[id].y, players[id].radius)) {
               players[id].hit();
@@ -131,8 +131,8 @@ public class Game {
         }
       }
       for (Bullet bullet : toRemove) {
-          enemy.bullets.remove(bullet);
-        }
+        enemy.getFiredBullets().remove(bullet);
+      }
     }
   }
 
