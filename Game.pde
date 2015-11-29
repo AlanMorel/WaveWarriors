@@ -101,17 +101,17 @@ public class Game {
   }
 
   public void checkPlayerBulletCollisions() {
-    ArrayList<Bullet2> toRemove = new ArrayList<Bullet2>();
+    ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
     for (final Player p : players) {
-      for (Bullet2 bullet : p.bullets) {
+      for (Bullet bullet : p.bullets) {
         for (Enemy enemy : wave.enemies) {
-          if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
+          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
             enemy.hit();
             toRemove.add(bullet);
           }
         }
       }
-      for (Bullet2 bullet : toRemove) {
+      for (Bullet bullet : toRemove) {
         p.bullets.remove(bullet);
       }
     }
@@ -122,7 +122,7 @@ public class Game {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
       for (Bullet bullet : enemy.getFiredBullets()) {
         for (final Player p : players) {
-          if (collided(bullet.x, bullet.y, Bullet2.BULLET_RADIUS / 2, p.x, p.y, p.radius)) {
+          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, p.x, p.y, p.radius)) {
             p.hit();
             toRemove.add(bullet);
           }
