@@ -116,7 +116,6 @@ public class Player extends Entity {
     }
 
     double angle = Math.atan2(mouseY - y, mouseX - x) * 180.0 / Math.PI;
-
     Bullet2 bullet = new Bullet2(x, y, (float) angle, 52, 152, 219);
     bullets.add(bullet);
   }
@@ -134,24 +133,22 @@ public class Player extends Entity {
     down = false;
   }
 
-  public void draw() {
+  public void display() {
     drawDownEffect();
     drawPlayer();
     drawId();
     drawCursor();
     drawBullets();
     drawHpBar();
-<<<<<<< HEAD
     drawRevivalSystem();
   }
 
   private void drawDownEffect() {
     if (!down) {
       return;
-=======
+    }
     for (Bullet2 bullet : bullets) {
       bullet.display();
->>>>>>> origin/master
     }
     noStroke();
     fill(255, 102, 102, 200 - (frameCount % 50) * 4);
@@ -184,7 +181,7 @@ public class Player extends Entity {
 
   public void drawBullets() {
     for (Bullet2 bullet : bullets) {
-      bullet.draw();
+      bullet.display();
     }
   }
 
@@ -198,6 +195,7 @@ public class Player extends Entity {
     rectMode(CORNER);
     rect(hpBarX - 75, height - 30, 150, 15, 3);
 
+    stroke(0);
     if (down) {
       fill(255 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5);
       rect(hpBarX - 75, height - 30, 150, 15, 3);
