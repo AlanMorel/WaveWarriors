@@ -1,7 +1,7 @@
 public class Enemy extends Entity {
 
   private float speed;
-  private int wave;
+  private int waveNum;
 
   // Each enemy will have its own favored position from which to attack the player (e.g., 50 pixels east and 40 pixels north of the nearest player)
   private int xTargetOffset;
@@ -19,6 +19,7 @@ public class Enemy extends Entity {
   private ArrayList<Bullet> magazine;
   private int fireDelay;
   private float bulletSpeed;
+  private float marginOfError;
 
   public static final float BASE_BULLET_SPEED = 2;
   public static final int BULLET_SPEED_FACTOR = 1;
@@ -35,39 +36,26 @@ public class Enemy extends Entity {
   public static final float MAXIMUM_SPEED = 1;
 
   public static final int MAGAZINE_CAPACITY = 15;
-  
-  public static final int LOW_ACCURACY = 1;
-  public static final int MEDIUM_ACCURACY = 2;
-  public static final int HIGH_ACCURACY = 3;
-
-  public static final int LOW_ACCURACY_MARGIN_OF_ERROR = 175;
-  public static final int MEDIUM_ACCURACY_MARGIN_OF_ERROR = 110;
-  public static final int HIGH_ACCURACY_MARGIN_OF_ERROR = 75;
-
-  // Players within these ranges will be hit with nearly 100% certainty.
-  public static final int LOW_ACCURACY_CERTAIN_HIT_RANGE = 250;
-  public static final int MEDIUM_ACCURACY_CERTAIN_HIT_RANGE = 400;
-  public static final int HIGH_ACCURACY_CERTAIN_HIT_RANGE = 550;
 
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 3;
   public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
-  public Enemy(final int wave, final float x, final float y) {
-    super(x, y, BASE_HEALTH + wave * HEALTH_FACTOR, ENEMY_RADIUS);
-    this.speed = (random(MINIMUM_SPEED, MAXIMUM_SPEED) * wave);
-    println("Enemy speed:" + speed);
-    this.wave = wave;
+  public Enemy(final int waveNum, final float x, final float y) {
+    super(x, y, BASE_HEALTH + waveNum * HEALTH_FACTOR, ENEMY_RADIUS);
+    this.speed = (random(MINIMUM_SPEED, MAXIMUM_SPEED) * waveNum);
+    this.waveNum = waveNum;
     
     this.rFillColor = random(MAX_COLOR_VALUE);
     this.gFillColor = random(MAX_COLOR_VALUE);
     this.bFillColor = random(MAX_COLOR_VALUE);
 
-    this.bulletSpeed = BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * wave);
+    this.marginOfError = getShootingMarginOfError();
+    this.bulletSpeed = BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * waveNum);
     this.firedBullets = new ArrayList<Bullet>();
     this.magazine = new ArrayList<Bullet>();
-    reloadMagazine(magazine);
+    reloadMagazine();
     
     updateFireDelay();
     setNewTargetPosition();
@@ -82,7 +70,7 @@ public class Enemy extends Entity {
 
   public void update() {
     if (magazine.isEmpty()) {
-      reloadMagazine(magazine); 
+      reloadMagazine(); 
     }
     advanceToNearestAlivePlayer();
     updateShootingStatus();
@@ -105,32 +93,24 @@ public class Enemy extends Entity {
   }
 
   public void fireAtPlayer(final Player player) {
-    if (magazine.isEmpty()) {
-      reloadMagazine(magazine);
-    }
+    final float targetX = player.x + random(-radius - marginOfError, radius + marginOfError);
+    final float targetY = player.y + random(-radius - marginOfError, radius + marginOfError);
 
-    float targetX = player.x;
-    float targetY = player.y;
-    float range = dist(x, y, targetX, targetY);    
-
-    if ((getFiringAccuracy() == LOW_ACCURACY) && (range > LOW_ACCURACY_CERTAIN_HIT_RANGE)) {
-      targetX = player.x + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
-      targetY = player.y + random(-LOW_ACCURACY_MARGIN_OF_ERROR, LOW_ACCURACY_MARGIN_OF_ERROR);
-    } else if ((getFiringAccuracy() == MEDIUM_ACCURACY) && (range > MEDIUM_ACCURACY_CERTAIN_HIT_RANGE)) {
-      targetX = player.x + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
-      targetY = player.y + random(-MEDIUM_ACCURACY_MARGIN_OF_ERROR, MEDIUM_ACCURACY_MARGIN_OF_ERROR);
-    } else if ((getFiringAccuracy() == HIGH_ACCURACY) && (range > HIGH_ACCURACY_CERTAIN_HIT_RANGE)) {
-      targetX = player.x + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
-      targetY = player.y + random(-HIGH_ACCURACY_MARGIN_OF_ERROR, HIGH_ACCURACY_MARGIN_OF_ERROR);
-    }
-    float deltaX = x - targetX;
-    float deltaY = y - targetY;
+    final float deltaX = x - targetX;
+    final float deltaY = y - targetY;
     final float direction = atan2(deltaY, deltaX);
 
-    final Bullet bullet = magazine.remove(magazine.size() - 1);
+    final Bullet bullet = getNextBullet();
     bullet.setPosition(x, y);
     bullet.setVelocity(bulletSpeed, direction);
     firedBullets.add(bullet);
+  }
+  
+  private Bullet getNextBullet() {
+    if (magazine.isEmpty()) {
+      reloadMagazine(); 
+    }
+    return magazine.remove(magazine.size() - 1);
   }
 
   public void advanceToNearestAlivePlayer() {
@@ -188,7 +168,7 @@ public class Enemy extends Entity {
     }
   }
 
-  private void reloadMagazine(final ArrayList<Bullet> magazine) {
+  private void reloadMagazine() {
     while(magazine.size() < MAGAZINE_CAPACITY) {
       magazine.add(new Bullet(rFillColor, gFillColor, bFillColor)); 
     }
@@ -221,22 +201,18 @@ public class Enemy extends Entity {
     }
   }
 
-  public int getFiringAccuracy() {
-    if (wave <= 3) {
-      return LOW_ACCURACY;
-    } else if (wave <= 7) {
-      return MEDIUM_ACCURACY;
-    } else {
-      return HIGH_ACCURACY;
-    }
-  }
-  
   private ArrayList<Bullet> getFiredBullets() {
     return firedBullets; 
   }
 
   private boolean isOnScreen() {
     return (x > (radius + 10)) && (x < width - (radius + 10)) && (y > (radius + 10)) && (y < height - (radius + 10));
+  }
+  
+  public float getShootingMarginOfError() {
+    final float numerator = pow((waveNum + 17), 2);
+    final float denominator = pow(1.1, waveNum + 17) - 1;
+    return numerator / denominator;  // The margin of error gradually decreases, as wave increases.
   }
 }
 
