@@ -22,7 +22,7 @@ public class Enemy extends Entity {
   private float shootingMarginOfError;
 
   public static final float BASE_BULLET_SPEED = 2;
-  public static final int BULLET_SPEED_FACTOR = 0.2;
+  public static final float BULLET_SPEED_FACTOR = 0.2;
 
   public static final int BASE_HEALTH = 4;
   public static final int HEALTH_FACTOR = 1;
@@ -43,13 +43,11 @@ public class Enemy extends Entity {
   public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
   public Enemy(final int waveNum, final float x, final float y) {
-    final float hpCapacity = getHpCapacity();
-    super(x, y, hpCapacity, ENEMY_RADIUS);
-    this.waveNum = waveNum;
+    super(x, y, (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR), ENEMY_RADIUS);
         
-    this.speed = getSpeed();
-    this.shootingMarginOfError = getShootingMarginOfError();
-    this.bulletSpeed = getBulletSpeed();
+    this.speed = getEnemySpeedForWave(waveNum);
+    this.shootingMarginOfError = getShootingMarginOfErrorForWave(waveNum);
+    this.bulletSpeed = getBulletSpeedForWave(waveNum);
     
     this.rFillColor = random(MAX_COLOR_VALUE);
     this.gFillColor = random(MAX_COLOR_VALUE);
@@ -134,8 +132,8 @@ public class Enemy extends Entity {
   }
 
   public void fireAtPlayer(final Player player) {
-    final float targetX = player.x + random(-radius - marginOfError, radius + marginOfError);
-    final float targetY = player.y + random(-radius - marginOfError, radius + marginOfError);
+    final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
+    final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
 
     final float deltaX = x - targetX;
     final float deltaY = y - targetY;
@@ -221,21 +219,17 @@ public class Enemy extends Entity {
   
   
   // Calculation Methods
-  public float getBulletSpeed() {
+  public float getBulletSpeedForWave(final int waveNum) {
     return BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * waveNum);
   }
   
-  public float getHpCapacity() {
-    return BASE_HEALTH + waveNum * HEALTH_FACTOR;
-  }
-  
-  public float getShootingMarginOfError() {
+  public float getShootingMarginOfErrorForWave(final int waveNum) {
     final float numerator = pow((waveNum + 17), 2);
     final float denominator = pow(1.1, waveNum + 17) - 1;
     return numerator / denominator;  // The margin of error gradually decreases, as wave increases.
   }
   
-  public float getSpeed() {
+  public float getEnemySpeedForWave(final int waveNum) {
     return random(MINIMUM_SPEED, MAXIMUM_SPEED) + (waveNum * WAVE_SPEED_FACTOR);
   }
   
