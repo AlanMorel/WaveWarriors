@@ -4,13 +4,18 @@ public class Game {
   public ArrayList<Player> players;
   private boolean paused;
   
+  private boolean isIntroducingWave;
   private Wave wave;
   private int waveLevel;
+  private int waveLevelFontTransparency;
+  
+  PFont waveFont;
 
   public static final int FIRST_WAVE_LEVEL = 1;
+  public static final int BASE_FONT_SIZE = 100;
+  public static final int MAX_FONT_OPACITY = 180;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
-
     this.background = loadImage("gamebackground.png");
     this.players = new ArrayList<Player>();
 
@@ -33,6 +38,10 @@ public class Game {
     this.paused = false;
     this.waveLevel = FIRST_WAVE_LEVEL;
     this.wave = new Wave(waveLevel);
+    this.waveFont = loadFont("Silom-100.vlw");
+    this.waveLevelFontTransparency = 0;
+    
+    this.isIntroducingWave = true;
   }
 
   public void update() {
@@ -50,15 +59,36 @@ public class Game {
       healAllPlayers(); 
     }
     
-    updateWave();
+    updateWaveFont();
+    updateIntroductionStatus();
     checkCollisions();
+    
+    if (!isIntroducingWave) {
+      updateWave();  // Don' allow wave to advance while introductory text is on screen
+    }
   }
   
   private void updateWave() {
     if (wave.isDefeated()) {
+      isIntroducingWave = true;
       wave = new Wave(++waveLevel);
     } 
     wave.update();
+  }
+  
+  private void updateWaveFont() {
+    if (isIntroducingWave) {
+      waveLevelFontTransparency++;
+    } else {
+      waveLevelFontTransparency = 0; 
+    }
+  }
+  
+  private void updateIntroductionStatus() {
+    if (waveLevelFontTransparency >= MAX_FONT_OPACITY) {
+      isIntroducingWave = false;
+      waveLevelFontTransparency = 0;
+    }
   }
   
   private void updatePlayers() {
@@ -71,11 +101,15 @@ public class Game {
     image(background, 0, 0);
     
     drawPlayers();
-    wave.display();
-
+    
+    if (isIntroducingWave) {
+      introduceWave(waveLevel);
+    }
+    
     if (paused) {
       drawPauseMenu();
     }
+    wave.display();
   }
 
   void mouseClicked() {
@@ -152,6 +186,35 @@ public class Game {
     for (final Player p : players) {
       p.display();
     }
+  }
+  
+  private void introduceWave(final int waveLevel) {
+    drawTransparentScreenWithFill(255, 150 - waveLevelFontTransparency);
+    textAlign(CENTER);
+    textFont(waveFont, BASE_FONT_SIZE + 50);
+    fill(255, 229, 128, waveLevelFontTransparency);
+    text("W a v e", width/2, height/2 - 100);
+    text("#" + waveLevel, width/2, height/2 + 100);
+  }
+  
+  private void drawTransparentScreenWithFill(float r, float g, float b, float t) {
+    r = constrain(r, 0, 255);
+    g = constrain(g, 0, 255);
+    b = constrain(b, 0, 255);
+    t = constrain(t, 0, 255);
+    noStroke();
+    fill(r, g, b, t);
+    rectMode(CENTER);
+    rect(width/2, height/2, width, height);
+  }
+  
+  private void drawTransparentScreenWithFill(float black, float t) {
+    black = constrain(black, 0, 255);
+    t = constrain(t, 0, 255);
+    noStroke();
+    fill(black, t);
+    rectMode(CENTER);
+    rect(width/2, height/2, width, height);
   }
 }
 
