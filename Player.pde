@@ -3,7 +3,7 @@ public class Player extends Entity {
   private static final int REVIVAL_DURATION = 100;
 
   public int id;
-  public ArrayList<Bullet2> bullets;
+  public ArrayList<Bullet> bullets;
   public int speed;
 
   public Player partner;
@@ -13,7 +13,7 @@ public class Player extends Entity {
   public Player(int id, int x, int y, boolean down) {
     super(x, y, 10, 75);
     this.id = id;
-    this.bullets = new ArrayList<Bullet2>();
+    this.bullets = new ArrayList<Bullet>();
     this.speed = 3;
     this.reviveTime = 0;
     this.partner = null;
@@ -67,7 +67,7 @@ public class Player extends Entity {
 
   public void update() {
 
-    for (Bullet2 bullet : bullets) {
+    for (Bullet bullet : bullets) {
       bullet.update();
     }
 
@@ -115,8 +115,12 @@ public class Player extends Entity {
       return;
     }
 
-    double angle = Math.atan2(mouseY - y, mouseX - x) * 180.0 / Math.PI;
-    Bullet2 bullet = new Bullet2(x, y, (float) angle, 52, 152, 219);
+    float deltaX = x - mouseX;
+    float deltaY = y - mouseY;
+    final float direction = atan2(deltaY, deltaX);
+    final Bullet bullet = new Bullet(52, 152, 219);
+    bullet.setPosition(x, y);
+    bullet.setVelocity(Bullet.BULLET_SPEED, direction);
     bullets.add(bullet);
   }
 
@@ -147,7 +151,7 @@ public class Player extends Entity {
     if (!down) {
       return;
     }
-    for (Bullet2 bullet : bullets) {
+    for (Bullet bullet : bullets) {
       bullet.display();
     }
     noStroke();
@@ -180,7 +184,7 @@ public class Player extends Entity {
   }
 
   public void drawBullets() {
-    for (Bullet2 bullet : bullets) {
+    for (Bullet bullet : bullets) {
       bullet.display();
     }
   }

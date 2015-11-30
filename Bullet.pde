@@ -11,6 +11,8 @@ public class Bullet {
   private float blue;
 
   public static final float BULLET_RADIUS = 8;
+  public static final float BULLET_SPEED = 5;
+
 
   public Bullet(final float red, final float green, final float blue) {
     this.red = red;
