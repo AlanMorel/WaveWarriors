@@ -116,6 +116,11 @@ public class Enemy extends Entity {
   }
 
   public void fireAtPlayer(final Player player) {
+    if (player == null) {
+      println("Cannot fire at nearest player - no players detected."); 
+      return;
+    }
+    
     final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
     final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
 
@@ -172,7 +177,7 @@ public class Enemy extends Entity {
   }
 
   private Player getNearestAlivePlayer() {
-    Player closestPlayer = game.players.get(0);
+    Player closestPlayer = null;
     float minDistance = Integer.MAX_VALUE;
     for (final Player p : game.players) {
       if ((p == null) || (p.down)) {
