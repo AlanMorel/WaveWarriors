@@ -10,6 +10,9 @@ public class Player extends Entity {
   public int reviveTime;
   public boolean down;
 
+  public PowerUp powerUp;
+  public int pickUpTime;
+
   public Player(int id, int x, int y, boolean down) {
     super(x, y, 10, 75);
     this.id = id;
@@ -151,9 +154,6 @@ public class Player extends Entity {
     if (!down) {
       return;
     }
-    for (Bullet bullet : bullets) {
-      bullet.display();
-    }
     noStroke();
     fill(255, 102, 102, 200 - (frameCount % 50) * 4);
     ellipse(x, y, radius * 2 + (frameCount % 50) * 4, radius * 2 + (frameCount % 50) * 4);
@@ -233,4 +233,5 @@ public class Player extends Entity {
     rect(revivalBarX - 75, height - 80, getReviveDuration() * 150 / REVIVAL_DURATION, 15, 3);
   }
 }
+
 

@@ -3,17 +3,22 @@ public class Game {
   private PImage background;
   public ArrayList<Player> players;
   private boolean paused;
-  
+
+  public ArrayList<PowerUp> powerUps;
+
   private boolean isIntroducingWave;
   private Wave wave;
   private int waveLevel;
   private int waveLevelFontTransparency;
-  
+
   PFont waveFont;
 
   public static final int FIRST_WAVE_LEVEL = 1;
   public static final int BASE_FONT_SIZE = 100;
   public static final int MAX_FONT_OPACITY = 180;
+
+  public static final int POWER_UP_SPAWN_DELAY = 1000;
+  private int lastPowerUpSpawn;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
     this.background = loadImage("gamebackground.png");
@@ -24,7 +29,7 @@ public class Game {
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, true));
+      players.add(new Player(2, 1100, 100, false));
     }
 
     if (player3) {
@@ -40,8 +45,11 @@ public class Game {
     this.wave = new Wave(waveLevel);
     this.waveFont = loadFont("Silom-100.vlw");
     this.waveLevelFontTransparency = 0;
-    
+
     this.isIntroducingWave = true;
+
+    this.powerUps = new ArrayList<PowerUp>();
+    this.lastPowerUpSpawn = 0;
   }
 
   public void update() {
@@ -56,18 +64,20 @@ public class Game {
 
     updatePlayers();
     if (wave.isDefeated()) {
-      healAllPlayers(); 
+      healAllPlayers();
     }
-    
+
     updateWaveFont();
     updateIntroductionStatus();
     checkCollisions();
-    
+
     if (!isIntroducingWave) {
       updateWave();  // Don' allow wave to advance while introductory text is on screen
     }
+
+    checkPowerUpSpawn();
   }
-  
+
   private void updateWave() {
     if (wave.isDefeated()) {
       isIntroducingWave = true;
@@ -75,22 +85,22 @@ public class Game {
     } 
     wave.update();
   }
-  
+
   private void updateWaveFont() {
     if (isIntroducingWave) {
       waveLevelFontTransparency++;
     } else {
-      waveLevelFontTransparency = 0; 
+      waveLevelFontTransparency = 0;
     }
   }
-  
+
   private void updateIntroductionStatus() {
     if (waveLevelFontTransparency >= MAX_FONT_OPACITY) {
       isIntroducingWave = false;
       waveLevelFontTransparency = 0;
     }
   }
-  
+
   private void updatePlayers() {
     for (final Player p : players) {
       p.update();
@@ -99,13 +109,14 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-    
+
     drawPlayers();
-    
+    drawPowerUps();
+
     if (isIntroducingWave) {
       introduceWave(waveLevel);
     }
-    
+
     if (paused) {
       drawPauseMenu();
     }
@@ -132,6 +143,7 @@ public class Game {
   public void checkCollisions() {
     checkPlayerBulletCollisions();
     checkEnemyBulletCollisions();
+    checkPlayerPowerUpCollisions();
   }
 
   public void checkPlayerBulletCollisions() {
@@ -154,7 +166,7 @@ public class Game {
   public void checkEnemyBulletCollisions() {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
-      for (Bullet bullet : enemy.getFiredBullets()) {
+      for (Bullet bullet : enemy.getFiredBullets ()) {
         for (final Player p : players) {
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, p.x, p.y, p.radius)) {
             p.hit();
@@ -168,26 +180,47 @@ public class Game {
     }
   }
 
+  public void checkPlayerPowerUpCollisions() {
+    ArrayList<PowerUp> toRemove = new ArrayList<PowerUp>();
+    for (PowerUp powerUp : powerUps) {
+      for (Player player : players) {
+        if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
+          player.powerUp = powerUp;
+          toRemove.add(powerUp);
+        }
+      }
+    }
+    for (PowerUp powerUp : toRemove) {
+      powerUps.remove(powerUp);
+    }
+  }
+
   public boolean collided(float x1, float y1, float r1, float x2, float y2, float r2) {
     return dist(x1, y1, x2, y2) < r1 + r2;
   }
-  
+
   public float playerDist(Player p1, Player p2) {
     return dist(p1.x, p1.y, p2.x, p2.y);
   }
-  
+
   private void healAllPlayers() {
     for (final Player p : players) {
       p.respawn();
-    } 
+    }
   }
-  
+
   private void drawPlayers() {
     for (final Player p : players) {
       p.display();
     }
   }
-  
+
+  private void drawPowerUps() {
+    for (PowerUp powerUp : powerUps) {
+      powerUp.draw();
+    }
+  }
+
   private void introduceWave(final int waveLevel) {
     drawTransparentScreenWithFill(255, 150 - waveLevelFontTransparency);
     textAlign(CENTER);
@@ -196,7 +229,7 @@ public class Game {
     text("W a v e", width/2, height/2 - 100);
     text("#" + waveLevel, width/2, height/2 + 100);
   }
-  
+
   private void drawTransparentScreenWithFill(float r, float g, float b, float t) {
     r = constrain(r, 0, 255);
     g = constrain(g, 0, 255);
@@ -207,7 +240,7 @@ public class Game {
     rectMode(CENTER);
     rect(width/2, height/2, width, height);
   }
-  
+
   private void drawTransparentScreenWithFill(float black, float t) {
     black = constrain(black, 0, 255);
     t = constrain(t, 0, 255);
@@ -216,5 +249,29 @@ public class Game {
     rectMode(CENTER);
     rect(width/2, height/2, width, height);
   }
+
+  private void checkPowerUpSpawn() {
+    if (shouldSpawnPowerUp()) {
+      spawnPowerUp();
+    }
+  }
+
+  private boolean shouldSpawnPowerUp() {
+    return frameCount - lastPowerUpSpawn >= POWER_UP_SPAWN_DELAY;
+  }
+
+  private PowerUp getRandomPowerUp() {
+    float x = random(width - 100) + 50;
+    float y = random(height - 100) + 50;
+    int type = int(random(3));
+    return new PowerUp(x, y, type);
+  }
+
+  private void spawnPowerUp() {
+    PowerUp powerUp = getRandomPowerUp();
+    powerUps.add(powerUp);
+    lastPowerUpSpawn = frameCount;
+  }
 }
+
 
