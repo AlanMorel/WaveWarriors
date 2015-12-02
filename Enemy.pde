@@ -40,7 +40,6 @@ public class Enemy extends Entity {
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 3;
-  public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
   public Enemy(final int waveNum, final float x, final float y) {
     super(x, y, (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR), ENEMY_RADIUS);
@@ -86,11 +85,11 @@ public class Enemy extends Entity {
     rectMode(CORNER);
 
     fill(255, 102, 102);
-    final float barWidth = maxHp * HP_BAR_WIDTH_FACTOR;
+    final float barWidth = radius*2;
     rect(hpBarX - barWidth/2, hpBarY, barWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
 
     fill(77, 255, 136);
-    final float remainingHealthWidth = hp * HP_BAR_WIDTH_FACTOR;
+    final float remainingHealthWidth = radius*hp/maxHp * 2;
     rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
