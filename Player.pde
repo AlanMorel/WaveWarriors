@@ -1,6 +1,7 @@
 public class Player extends Entity {
 
   private static final int REVIVAL_DURATION = 100;
+  private static final int POWER_UP_DURATION = 250;
 
   public int id;
   public ArrayList<Bullet> bullets;
@@ -84,6 +85,10 @@ public class Player extends Entity {
       return;
     }
 
+    if (powerUp != null && powerUp.isSpeed()) {
+      speed *= 2;
+    }
+
     if (keys[UP] || keys['W']) {
       y-= speed;
       if (y < radius ) {
@@ -110,6 +115,14 @@ public class Player extends Entity {
       if (x > width - radius) {
         x = width - radius;
       }
+    }
+
+    if (powerUp != null && powerUp.isSpeed()) {
+      speed /= 2;
+    }
+    
+    if (frameCount - pickUpTime > POWER_UP_DURATION){
+      powerUp = null;
     }
   }
 
@@ -147,6 +160,7 @@ public class Player extends Entity {
     drawCursor();
     drawBullets();
     drawHpBar();
+    drawPowerUp();
     drawRevivalSystem();
   }
 
@@ -219,6 +233,19 @@ public class Player extends Entity {
       fill(77, 255, 136);
     }
   }
+  
+  
+  public void drawPowerUp() {
+    if (powerUp == null){
+      return;
+    }
+    
+    int textX = id * 325 - 175;
+    
+    textSize(18);
+    fill(0);
+    text(powerUp.name + " power up active", textX, height - 100);
+  }
 
   public void drawRevivalSystem() {
     if (partner == null) {
@@ -233,5 +260,4 @@ public class Player extends Entity {
     rect(revivalBarX - 75, height - 80, getReviveDuration() * 150 / REVIVAL_DURATION, 15, 3);
   }
 }
-
 

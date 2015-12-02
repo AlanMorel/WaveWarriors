@@ -17,7 +17,7 @@ public class Game {
   public static final int BASE_FONT_SIZE = 100;
   public static final int MAX_FONT_OPACITY = 180;
 
-  public static final int POWER_UP_SPAWN_DELAY = 1000;
+  public static final int POWER_UP_SPAWN_DELAY = 100;
   private int lastPowerUpSpawn;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
@@ -148,17 +148,20 @@ public class Game {
 
   public void checkPlayerBulletCollisions() {
     ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
-    for (final Player p : players) {
-      for (Bullet bullet : p.bullets) {
+    for (Player player : players) {
+      for (Bullet bullet : player.bullets) {
         for (Enemy enemy : wave.enemies) {
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
-            enemy.hit();
             toRemove.add(bullet);
+            enemy.hit();
+            if (player.powerUp != null && player.powerUp.isDamage()) {
+              enemy.hit();
+            }
           }
         }
       }
       for (Bullet bullet : toRemove) {
-        p.bullets.remove(bullet);
+        player.bullets.remove(bullet);
       }
     }
   }
@@ -167,10 +170,10 @@ public class Game {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
       for (Bullet bullet : enemy.getFiredBullets ()) {
-        for (final Player p : players) {
-          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, p.x, p.y, p.radius)) {
-            p.hit();
+        for (Player player : players) {
+          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, player.x, player.y, player.radius)) {
             toRemove.add(bullet);
+            player.hit();
           }
         }
       }
@@ -186,6 +189,7 @@ public class Game {
       for (Player player : players) {
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
           player.powerUp = powerUp;
+          player.pickUpTime = frameCount;
           toRemove.add(powerUp);
         }
       }
@@ -273,5 +277,4 @@ public class Game {
     lastPowerUpSpawn = frameCount;
   }
 }
-
 
