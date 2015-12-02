@@ -10,12 +10,14 @@ public class Game {
   private Wave wave;
   private int waveLevel;
   private int waveLevelFontTransparency;
+  private int waveTextX;
+  private int introFrame;
 
   PFont waveFont;
 
   public static final int FIRST_WAVE_LEVEL = 1;
   public static final int BASE_FONT_SIZE = 100;
-  public static final int MAX_FONT_OPACITY = 180;
+  public static final int INTRO_FRAME_LENGTH = 100;
 
   public static final int POWER_UP_SPAWN_DELAY = 100;
   private int lastPowerUpSpawn;
@@ -45,6 +47,8 @@ public class Game {
     this.wave = new Wave(waveLevel);
     this.waveFont = loadFont("Silom-100.vlw");
     this.waveLevelFontTransparency = 0;
+    this.waveTextX = 0;
+    this.introFrame = 0;
 
     this.isIntroducingWave = true;
 
@@ -88,16 +92,15 @@ public class Game {
 
   private void updateWaveFont() {
     if (isIntroducingWave) {
-      waveLevelFontTransparency++;
-    } else {
-      waveLevelFontTransparency = 0;
+      introFrame++;
     }
   }
 
   private void updateIntroductionStatus() {
-    if (waveLevelFontTransparency >= MAX_FONT_OPACITY) {
+    if (introFrame >= INTRO_FRAME_LENGTH) {
       isIntroducingWave = false;
-      waveLevelFontTransparency = 0;
+      waveTextX = 0;
+      introFrame = 0;
     }
   }
 
@@ -226,15 +229,22 @@ public class Game {
   }
 
   private void introduceWave(final int waveLevel) {
-    drawTransparentScreenWithFill(255, 150 - waveLevelFontTransparency);
+    drawTransparentBannerWithFill(20, 125);
     textAlign(CENTER);
     textFont(waveFont, BASE_FONT_SIZE + 50);
-    fill(255, 229, 128, waveLevelFontTransparency);
-    text("W a v e", width/2, height/2 - 100);
-    text("#" + waveLevel, width/2, height/2 + 100);
+    fill(13, 242, 242, 220);
+    
+    if ((waveTextX < width/3.5) || (waveTextX > width*2/3.5)) {
+      waveTextX += 30; 
+    } else {
+      waveTextX += 7;
+    }
+    
+    text("Wave", waveTextX, height/2 - 50);
+    text("#" + waveLevel, width - waveTextX, height/2 + 100);
   }
 
-  private void drawTransparentScreenWithFill(float r, float g, float b, float t) {
+  private void drawTransparentBannerWithFill(float r, float g, float b, float t) {
     r = constrain(r, 0, 255);
     g = constrain(g, 0, 255);
     b = constrain(b, 0, 255);
@@ -242,16 +252,16 @@ public class Game {
     noStroke();
     fill(r, g, b, t);
     rectMode(CENTER);
-    rect(width/2, height/2, width, height);
+    rect(width/2, height/2, width, height/2);
   }
 
-  private void drawTransparentScreenWithFill(float black, float t) {
+  private void drawTransparentBannerWithFill(float black, float t) {
     black = constrain(black, 0, 255);
     t = constrain(t, 0, 255);
     noStroke();
     fill(black, t);
     rectMode(CENTER);
-    rect(width/2, height/2, width, height);
+    rect(width/2, height/2, width, height/2);
   }
 
   private void checkPowerUpSpawn() {

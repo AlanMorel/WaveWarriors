@@ -16,7 +16,6 @@ public class Enemy extends Entity {
   private float bFillColor;
 
   private ArrayList<Bullet> firedBullets;
-  private ArrayList<Bullet> magazine;
   private int fireDelay;
   private float bulletSpeed;
   private float shootingMarginOfError;
@@ -35,12 +34,9 @@ public class Enemy extends Entity {
   public static final float MINIMUM_SPEED = 0.1;
   public static final float MAXIMUM_SPEED = 1.1;
 
-  public static final int MAGAZINE_CAPACITY = 15;
-
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 3;
-  public static final float HP_BAR_WIDTH_FACTOR = 4.5;
 
   public Enemy(final int waveNum, final float x, final float y) {
     super(x, y, (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR), ENEMY_RADIUS);
@@ -54,8 +50,6 @@ public class Enemy extends Entity {
     this.bFillColor = random(MAX_COLOR_VALUE);
 
     this.firedBullets = new ArrayList<Bullet>();
-    this.magazine = new ArrayList<Bullet>();
-    reloadMagazine();
     
     updateFireDelay();
     setNewTargetPosition();
@@ -86,11 +80,11 @@ public class Enemy extends Entity {
     rectMode(CORNER);
 
     fill(255, 102, 102);
-    final float barWidth = maxHp * HP_BAR_WIDTH_FACTOR;
+    final float barWidth = radius*2;
     rect(hpBarX - barWidth/2, hpBarY, barWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
 
     fill(77, 255, 136);
-    final float remainingHealthWidth = hp * HP_BAR_WIDTH_FACTOR;
+    final float remainingHealthWidth = radius*hp/maxHp * 2;
     rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
@@ -98,9 +92,6 @@ public class Enemy extends Entity {
 
   // Update Methods
   public void update() {
-    if (magazine.isEmpty()) {
-      reloadMagazine(); 
-    }
     advanceToNearestAlivePlayer();
     updateShootingStatus();
   }
@@ -119,19 +110,17 @@ public class Enemy extends Entity {
 
 
   // Shooting Methods
-  private Bullet getNextBullet() {
-    if (magazine.isEmpty()) {
-      reloadMagazine(); 
-    }
-    return magazine.remove(magazine.size() - 1);
-  }
-  
   public void fireAtNearestAlivePlayer() {
     final Player nearestPlayer = getNearestAlivePlayer();
     fireAtPlayer(nearestPlayer);
   }
 
   public void fireAtPlayer(final Player player) {
+    if (player == null) {
+      println("Cannot fire at nearest player - no players detected."); 
+      return;
+    }
+    
     final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
     final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
 
@@ -139,7 +128,7 @@ public class Enemy extends Entity {
     final float deltaY = y - targetY;
     final float direction = atan2(deltaY, deltaX);
 
-    final Bullet bullet = getNextBullet();
+    final Bullet bullet = new Bullet(rFillColor, gFillColor, bFillColor);
     bullet.setPosition(x, y);
     bullet.setVelocity(bulletSpeed, direction);
     firedBullets.add(bullet);
@@ -147,12 +136,6 @@ public class Enemy extends Entity {
   
   private ArrayList<Bullet> getFiredBullets() {
     return firedBullets; 
-  }
-  
-  private void reloadMagazine() {
-    while(magazine.size() < MAGAZINE_CAPACITY) {
-      magazine.add(new Bullet(rFillColor, gFillColor, bFillColor)); 
-    }
   }
   
   public void hit() {
@@ -194,7 +177,7 @@ public class Enemy extends Entity {
   }
 
   private Player getNearestAlivePlayer() {
-    Player closestPlayer = game.players.get(0);
+    Player closestPlayer = null;
     float minDistance = Integer.MAX_VALUE;
     for (final Player p : game.players) {
       if ((p == null) || (p.down)) {
