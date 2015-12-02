@@ -16,7 +16,6 @@ public class Enemy extends Entity {
   private float bFillColor;
 
   private ArrayList<Bullet> firedBullets;
-  private ArrayList<Bullet> magazine;
   private int fireDelay;
   private float bulletSpeed;
   private float shootingMarginOfError;
@@ -35,8 +34,6 @@ public class Enemy extends Entity {
   public static final float MINIMUM_SPEED = 0.1;
   public static final float MAXIMUM_SPEED = 1.1;
 
-  public static final int MAGAZINE_CAPACITY = 15;
-
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 3;
@@ -53,8 +50,6 @@ public class Enemy extends Entity {
     this.bFillColor = random(MAX_COLOR_VALUE);
 
     this.firedBullets = new ArrayList<Bullet>();
-    this.magazine = new ArrayList<Bullet>();
-    reloadMagazine();
     
     updateFireDelay();
     setNewTargetPosition();
@@ -97,9 +92,6 @@ public class Enemy extends Entity {
 
   // Update Methods
   public void update() {
-    if (magazine.isEmpty()) {
-      reloadMagazine(); 
-    }
     advanceToNearestAlivePlayer();
     updateShootingStatus();
   }
@@ -118,13 +110,6 @@ public class Enemy extends Entity {
 
 
   // Shooting Methods
-  private Bullet getNextBullet() {
-    if (magazine.isEmpty()) {
-      reloadMagazine(); 
-    }
-    return magazine.remove(magazine.size() - 1);
-  }
-  
   public void fireAtNearestAlivePlayer() {
     final Player nearestPlayer = getNearestAlivePlayer();
     fireAtPlayer(nearestPlayer);
@@ -138,7 +123,7 @@ public class Enemy extends Entity {
     final float deltaY = y - targetY;
     final float direction = atan2(deltaY, deltaX);
 
-    final Bullet bullet = getNextBullet();
+    final Bullet bullet = new Bullet(rFillColor, gFillColor, bFillColor);
     bullet.setPosition(x, y);
     bullet.setVelocity(bulletSpeed, direction);
     firedBullets.add(bullet);
@@ -146,12 +131,6 @@ public class Enemy extends Entity {
   
   private ArrayList<Bullet> getFiredBullets() {
     return firedBullets; 
-  }
-  
-  private void reloadMagazine() {
-    while(magazine.size() < MAGAZINE_CAPACITY) {
-      magazine.add(new Bullet(rFillColor, gFillColor, bFillColor)); 
-    }
   }
   
   public void hit() {
