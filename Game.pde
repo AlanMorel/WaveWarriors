@@ -17,9 +17,9 @@ public class Game {
 
   public static final int FIRST_WAVE_LEVEL = 1;
   public static final int BASE_FONT_SIZE = 100;
-  public static final int INTRO_FRAME_LENGTH = 100;
+  public static final int INTRO_FRAME_LENGTH = 150;
 
-  public static final int POWER_UP_SPAWN_DELAY = 100;
+  public static final int POWER_UP_SPAWN_DELAY = 1000;
   private int lastPowerUpSpawn;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
@@ -229,39 +229,23 @@ public class Game {
   }
 
   private void introduceWave(final int waveLevel) {
-    drawTransparentBannerWithFill(20, 125);
+    noStroke();
+    fill(0, 255 - abs(INTRO_FRAME_LENGTH / 2 - introFrame) * 4);
+    rectMode(CENTER);
+    rect(width/2, height/2, width, height/2);
+    
     textAlign(CENTER);
-    textFont(waveFont, BASE_FONT_SIZE + 50);
-    fill(13, 242, 242, 220);
+    textFont(waveFont, BASE_FONT_SIZE + 25);
+    fill(255);
     
     if ((waveTextX < width/3.5) || (waveTextX > width*2/3.5)) {
       waveTextX += 30; 
     } else {
-      waveTextX += 7;
+      waveTextX += 3;
     }
     
     text("Wave", waveTextX, height/2 - 50);
-    text("#" + waveLevel, width - waveTextX, height/2 + 100);
-  }
-
-  private void drawTransparentBannerWithFill(float r, float g, float b, float t) {
-    r = constrain(r, 0, 255);
-    g = constrain(g, 0, 255);
-    b = constrain(b, 0, 255);
-    t = constrain(t, 0, 255);
-    noStroke();
-    fill(r, g, b, t);
-    rectMode(CENTER);
-    rect(width/2, height/2, width, height/2);
-  }
-
-  private void drawTransparentBannerWithFill(float black, float t) {
-    black = constrain(black, 0, 255);
-    t = constrain(t, 0, 255);
-    noStroke();
-    fill(black, t);
-    rectMode(CENTER);
-    rect(width/2, height/2, width, height/2);
+    text("#" + waveLevel, width - waveTextX, height/2 + 125);
   }
 
   private void checkPowerUpSpawn() {
