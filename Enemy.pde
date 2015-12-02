@@ -112,15 +112,14 @@ public class Enemy extends Entity {
   // Shooting Methods
   public void fireAtNearestAlivePlayer() {
     final Player nearestPlayer = getNearestAlivePlayer();
+    if (nearestPlayer == null) {
+      println("Cannot fire at nearest player - no players left."); 
+      return;
+    }
     fireAtPlayer(nearestPlayer);
   }
 
   public void fireAtPlayer(final Player player) {
-    if (player == null) {
-      println("Cannot fire at nearest player - no players detected."); 
-      return;
-    }
-    
     final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
     final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
 
@@ -151,6 +150,10 @@ public class Enemy extends Entity {
     }
 
     Player nearestPlayer = getNearestAlivePlayer();
+    if (nearestPlayer == null) {
+      println("Cannot fire at nearest player - no players left."); 
+      return;
+    }
     float deltaY = y - (nearestPlayer.y + yTargetOffset);
     float deltaX = x - (nearestPlayer.x + xTargetOffset);
     float direction  = atan2(deltaY, deltaX);
