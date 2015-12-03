@@ -57,7 +57,7 @@ public class Game {
   }
 
   public void update() {
-    if (keys[BACKSPACE]) {
+    if (keys[BACKSPACE] || controller1.start.pressed()) {
       paused = !paused;
       keys[BACKSPACE] = false;
     }

@@ -1,19 +1,19 @@
 public class Controller {
 
-  int player;
+  public int player;
 
-  ControlDevice device;
+  public ControlDevice device;
 
-  ControlButton A;
+  public ControlButton A, B, X, Y, leftB, rightB, back, start, leftClick, rightClick;
+  
+  public ControlSlider leftX;
+  public ControlSlider leftY;
 
-  ControlSlider leftX;
-  ControlSlider leftY;
+  public ControlSlider rightX;
+  public ControlSlider rightY;
 
-  ControlSlider rightX;
-  ControlSlider rightY;
-
-  ControlSlider leftT;
-  ControlSlider rightT;
+  public ControlSlider leftT;
+  public ControlSlider rightT;
 
   public Controller(int player) {
     this.player = player;
@@ -21,7 +21,16 @@ public class Controller {
     this.device = control.getDevice(mac ? "Xbox One Wired Controller" : "Controller (XBOX One For Windows)");
 
     this.A = device.getButton(mac ? "0" : "Button 0");
-
+    this.B = device.getButton(mac ? "1" : "Button 1");
+    this.X = device.getButton(mac ? "2" : "Button 2");
+    this.Y = device.getButton(mac ? "3" : "Button 3");
+    this.leftB = device.getButton(mac ? "4" : "Button 4");
+    this.rightB = device.getButton(mac ? "5" : "Button 5");
+    this.back = device.getButton(mac ? "6" : "Button 6");
+    this.start = device.getButton(mac ? "7" : "Button 7");
+    this.leftClick = device.getButton(mac ? "8" : "Button 8");
+    this.rightClick = device.getButton(mac ? "9" : "Button 9");
+    
     this.leftX = device.getSlider(mac ? "x" : "X Axis");
     this.leftX.setTolerance(0.15);
 

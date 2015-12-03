@@ -5,7 +5,7 @@ import net.java.games.input.*;
 public ControlIO control;
 public Controller controller1;
 
-public boolean mac = false;
+public boolean mac = true;
 
 public int state;
 
