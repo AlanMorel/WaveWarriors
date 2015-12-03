@@ -37,7 +37,7 @@ public class MainMenu {
   }
 
   public void updateSelector() {
-    if (keys[ENTER]) {
+    if (keys[ENTER] || controller1.A.pressed()) {
       if (selection == PLAY_GAME) {
         game = new Game(isPlayer1Ready(), isPlayer2Ready(), isPlayer3Ready(), isPlayer4Ready());
         state = GAME_STATE;
