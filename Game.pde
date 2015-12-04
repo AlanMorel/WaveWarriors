@@ -55,7 +55,7 @@ public class Game {
     this.isIntroducingWave = true;
 
     this.powerUps = new ArrayList<PowerUp>();
-    this.lastPowerUpSpawn = -500;
+    this.lastPowerUpSpawn = 0;
   }
 
   public void update() {

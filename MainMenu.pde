@@ -53,7 +53,7 @@ public class MainMenu {
     drawVerticalLines();
 
     drawSelector();
-    drawPlayerCircles();
+    drawReadyStatuses();
 
     for (Cursor cursor : cursors) {
       cursor.draw();
@@ -118,14 +118,14 @@ public class MainMenu {
     offset = (offset + 1) % SQUARE_SIDE;
   }
 
-  private void drawPlayerCircles() {
-    drawCircle(1, isPlayer1Ready());
-    drawCircle(2, isPlayer2Ready());
-    drawCircle(3, isPlayer3Ready());
-    drawCircle(4, isPlayer4Ready());
+  private void drawReadyStatuses() {
+    drawReadyStatus(1, isPlayer1Ready());
+    drawReadyStatus(2, isPlayer2Ready());
+    drawReadyStatus(3, isPlayer3Ready());
+    drawReadyStatus(4, isPlayer4Ready());
   }
 
-  private void drawCircle(int player, boolean ready) {
+  private void drawReadyStatus(int player, boolean ready) {
     image(ready ? xboxReady : xboxNotReady, (player - 1) * 340 + 70, 550);
   }
 
