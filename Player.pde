@@ -31,6 +31,26 @@ public class Player extends Entity {
     this.aim = 0;
   }
 
+  public boolean hasSpeed() {
+    return powerUp != null && powerUp.type == PowerUp.SPEED;
+  }
+
+  public boolean hasDamage() {
+    return powerUp != null && powerUp.type == PowerUp.DAMAGE;
+  }
+
+  public boolean hasFireRate() {
+    return powerUp != null && powerUp.type == PowerUp.FIRE_RATE;
+  }
+
+  public boolean hasBulletSpeed() {
+    return powerUp != null && powerUp.type == PowerUp.BULLET_SPEED;
+  }
+
+  public boolean hasInvincibility() {
+    return powerUp != null && powerUp.type == PowerUp.INVINCIBILITY;
+  }
+
   private Player getPartner() {
     for (Player player : game.players) {
       if (player != this && player.down && game.playerDist(player, this) < 75) {
@@ -81,7 +101,7 @@ public class Player extends Entity {
     updateAim();
 
     for (Bullet bullet : bullets) {
-      bullet.update();
+      bullet.update(this);
     }
 
     if (canStartRevivalProcess()) {
@@ -133,18 +153,6 @@ public class Player extends Entity {
       powerUp = null;
     }
   }
-  
- public boolean hasSpeed() {
-    return powerUp != null && powerUp.type == PowerUp.SPEED;
-  }
-
-  public boolean hasDamage() {
-    return powerUp != null && powerUp.type == PowerUp.DAMAGE;
-  }
-
-  public boolean hasFireRate() {
-    return powerUp != null && powerUp.type == PowerUp.FIRE_RATE;
-  }
 
   public void fixPosition() {    
     if (y < radius ) {
@@ -171,9 +179,10 @@ public class Player extends Entity {
     if (down || partner != null || frameCount - lastShot < FIRE_RATE / (hasFireRate() ? 2 : 1)) {
       return;
     }
-
-    Bullet bullet = new Bullet(52, 152, 219);
-    bullet.setPosition(x, y);
+    Bullet bullet = new Bullet(41, 128, 185);
+    float bulletX = x + (float) (radius * Math.sin(Math.toRadians(90 - aim)));
+    float bulletY = y + (float) (radius * Math.sin(Math.toRadians(aim)));
+    bullet.setPosition(bulletX, bulletY);
     bullet.setVelocity(Bullet.BULLET_SPEED, aim);
     bullets.add(bullet);
     lastShot = frameCount;
@@ -239,7 +248,7 @@ public class Player extends Entity {
 
   public void drawBullets() {
     for (Bullet bullet : bullets) {
-      bullet.display();
+      bullet.display(this);
     }
   }
 

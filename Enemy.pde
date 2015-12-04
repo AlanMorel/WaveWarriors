@@ -142,8 +142,6 @@ public class Enemy extends Entity {
     hp -= 1;
   }
   
-
-
   // Movement methods
   public void advanceToNearestAlivePlayer() {
     if (frameNumber++ >= framesBeforeUpdatingTarget) {

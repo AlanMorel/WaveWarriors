@@ -19,11 +19,13 @@ public class Game {
   public static final int BASE_FONT_SIZE = 100;
   public static final int INTRO_FRAME_LENGTH = 150;
 
-  public static final int POWER_UP_SPAWN_DELAY = 1000;
+  public static final int POWER_UP_SPAWN_DELAY = 500;
+  
   private int lastPowerUpSpawn;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
     this.background = loadImage("gamebackground.png");
+
     this.players = new ArrayList<Player>();
 
     if (player1) {
@@ -53,7 +55,7 @@ public class Game {
     this.isIntroducingWave = true;
 
     this.powerUps = new ArrayList<PowerUp>();
-    this.lastPowerUpSpawn = 0;
+    this.lastPowerUpSpawn = -500;
   }
 
   public void update() {
@@ -156,6 +158,7 @@ public class Game {
         for (Enemy enemy : wave.enemies) {
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
             toRemove.add(bullet);
+            bulletSound.trigger();
             enemy.hit();
             if (player.hasDamage()) {
               enemy.hit();
@@ -174,6 +177,9 @@ public class Game {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
       for (Bullet bullet : enemy.getFiredBullets ()) {
         for (Player player : players) {
+          if (player.hasInvincibility()){
+            continue;
+          }
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, player.x, player.y, player.radius)) {
             toRemove.add(bullet);
             player.hit();
@@ -193,6 +199,7 @@ public class Game {
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
           player.powerUp = powerUp;
           player.pickUpTime = frameCount;
+          powerUpSound.trigger();
           toRemove.add(powerUp);
         }
       }
@@ -261,7 +268,7 @@ public class Game {
   private PowerUp getRandomPowerUp() {
     float x = random(width - 100) + 50;
     float y = random(height - 100) + 50;
-    int type = int(random(3));
+    int type = int(random(5));
     return new PowerUp(x, y, type);
   }
 
