@@ -2,6 +2,7 @@ public class Player extends Entity {
 
   private static final int REVIVAL_DURATION = 100;
   private static final int POWER_UP_DURATION = 250;
+  private static final int FIRE_RATE = 10;
 
   public int id;
   public ArrayList<Bullet> bullets;
@@ -14,14 +15,21 @@ public class Player extends Entity {
   public PowerUp powerUp;
   public int pickUpTime;
 
-  public Player(int id, int x, int y, boolean down) {
+  public Controller controller;
+
+  public float aim;
+  public int lastShot;
+
+  public Player(int id, int x, int y, Controller controller, boolean down) {
     super(x, y, 10, 75);
     this.id = id;
     this.bullets = new ArrayList<Bullet>();
-    this.speed = 3;
+    this.speed = 2;
     this.reviveTime = 0;
     this.partner = null;
+    this.controller = controller;
     this.down = down;
+    this.aim = 0;
   }
 
   private Player getPartner() {
@@ -38,7 +46,7 @@ public class Player extends Entity {
   }
 
   private boolean canStartRevivalProcess() {
-    return keys['X'] && !down && reviveTime == 0 && getPartner() != null;
+    return (keys['X'] || controller.X.pressed()) && !down && reviveTime == 0 && getPartner() != null;
   }
 
   private void startRevivalProcess() {
@@ -48,7 +56,7 @@ public class Player extends Entity {
   }
 
   private boolean hasRevivalProcessBeenCancelled() {
-    return !keys['X'] && partner != null;
+    return !(keys['X'] || controller.X.pressed()) && partner != null;
   }
 
   private void cancelRevivalProcess() {
@@ -71,6 +79,8 @@ public class Player extends Entity {
 
   public void update() {
 
+    updateAim();
+
     for (Bullet bullet : bullets) {
       bullet.update();
     }
@@ -81,63 +91,81 @@ public class Player extends Entity {
       cancelRevivalProcess();
     } else if (hasRevivalBeenSuccessful()) {
       revive();
-    } else if (down || partner != null) {
-      return;
-    }
+    }  
 
-    if (powerUp != null && powerUp.isSpeed()) {
-      speed *= 2;
-    }
-
-    if (keys[UP] || keys['W']) {
-      y-= speed;
-      if (y < radius ) {
-        y = radius;
-      }
-    }
-
-    if (keys[DOWN] || keys['S']) {
-      y += speed;
-      if (y > height - radius) {
-        y = height - radius;
-      }
-    }
-
-    if (keys[LEFT] || keys['A']) {
-      x -= speed;
-      if (x < radius) {
-        x = radius;
-      }
-    }
-
-    if (keys[RIGHT] || keys['D']) {
-      x += speed;
-      if (x > width - radius) {
-        x = width - radius;
-      }
-    }
-
-    if (powerUp != null && powerUp.isSpeed()) {
-      speed /= 2;
-    }
-    
-    if (frameCount - pickUpTime > POWER_UP_DURATION){
-      powerUp = null;
-    }
-  }
-
-  public void shoot() {
     if (down || partner != null) {
       return;
     }
 
-    float deltaX = x - mouseX;
-    float deltaY = y - mouseY;
-    final float direction = atan2(deltaY, deltaX);
-    final Bullet bullet = new Bullet(52, 152, 219);
+    if (controller.getLeftT() < -0.5) {
+      shoot();
+    }
+
+    movePlayer();
+
+    if (powerUp != null && powerUp.isSpeed()) {
+      movePlayer();
+    }
+
+    fixPosition();
+  }
+
+  public void movePlayer() {
+    x += controller.getLeftX() * speed;
+    y += controller.getLeftY() * speed;
+
+    if (keys[UP] || keys['W']) {
+      y-= speed;
+    }
+
+    if (keys[DOWN] || keys['S']) {
+      y += speed;
+    }
+
+    if (keys[LEFT] || keys['A']) {
+      x -= speed;
+    }
+
+    if (keys[RIGHT] || keys['D']) {
+      x += speed;
+    }
+
+    if (frameCount - pickUpTime > POWER_UP_DURATION) {
+      powerUp = null;
+    }
+  }
+
+  public void fixPosition() {    
+    if (y < radius ) {
+      y = radius;
+    }
+
+    if (y > height - radius) {
+      y = height - radius;
+    }
+
+    if (x < radius) {
+      x = radius;
+    }
+    if (x > width - radius) {
+      x = width - radius;
+    }
+  }
+
+  public void updateAim() {
+    aim = (float) (Math.atan2(controller.getRightY(), controller.getRightX()) * 180.0 / Math.PI);
+  }
+
+  public void shoot() {
+    if (down || partner != null || frameCount - lastShot < FIRE_RATE) {
+      return;
+    }
+
+    Bullet bullet = new Bullet(52, 152, 219);
     bullet.setPosition(x, y);
-    bullet.setVelocity(Bullet.BULLET_SPEED, direction);
+    bullet.setVelocity(Bullet.BULLET_SPEED, aim);
     bullets.add(bullet);
+    lastShot = frameCount;
   }
 
   public void hit() {
@@ -162,6 +190,7 @@ public class Player extends Entity {
     drawHpBar();
     drawPowerUp();
     drawRevivalSystem();
+    drawCrosshairs();
   }
 
   private void drawDownEffect() {
@@ -233,15 +262,15 @@ public class Player extends Entity {
       fill(77, 255, 136);
     }
   }
-  
-  
+
+
   public void drawPowerUp() {
-    if (powerUp == null){
+    if (powerUp == null) {
       return;
     }
-    
+
     int textX = id * 325 - 175;
-    
+
     textSize(18);
     fill(0);
     text(powerUp.name + " power up active", textX, height - 100);
@@ -258,6 +287,19 @@ public class Player extends Entity {
     rect(revivalBarX - 75, height - 80, 150, 15, 3);
     fill(255);
     rect(revivalBarX - 75, height - 80, getReviveDuration() * 150 / REVIVAL_DURATION, 15, 3);
+  }
+
+  private void drawCrosshairs() {
+    drawCrosshair(40, 5);
+    drawCrosshair(45, 3);
+    drawCrosshair(48, 2);
+  }
+
+  private void drawCrosshair(int distance, int radius) {
+    float crossX = x + (float) (distance * Math.sin(Math.toRadians(90 - aim)));
+    float crossY = y + (float) (distance * Math.sin(Math.toRadians(aim)));
+    fill(0);
+    ellipse(crossX, crossY, radius, radius);
   }
 }
 

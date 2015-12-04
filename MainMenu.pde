@@ -45,10 +45,10 @@ public class MainMenu {
         exit();
       }
     }
-    if (keys[UP] || keys['W']) {
+    if (keys[UP] || keys['W'] || controller1.getLeftY() < - 0.25) {
       selection--;
     }
-    if (keys[DOWN] || keys['S']) {
+    if (keys[DOWN] || keys['S'] || controller1.getLeftY() > 0.25) {
       selection++;
     }
     if (selection < 0) {

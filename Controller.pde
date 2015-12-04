@@ -38,10 +38,10 @@ public class Controller {
     this.leftY.setTolerance(0.15);
 
     this.rightX = device.getSlider(mac ? "rx" : "X Rotation");
-    this.rightY = device.getSlider(mac ? "ry" : "Y Rotation");
+    this.rightY = device.getSlider(mac ? "ry" : "Y Rotation"); 
 
-    this.leftT = device.getSlider(mac ? "z" : "Z Axis:");
-    this.rightT = device.getSlider(mac ? "rz" : "Z Axis");
+    this.leftT = device.getSlider(mac ? "z" : "Z Axis");
+    this.rightT = device.getSlider(mac ? "rz" : "Z Rotation");
   }
 
   public float getLeftX() {

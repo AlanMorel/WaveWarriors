@@ -1,6 +1,5 @@
 public class Bullet {
 
-  // Determined (i.e., set) only when fired
   private float direction;  
   private float speed;
   private float x;
@@ -12,7 +11,6 @@ public class Bullet {
 
   public static final float BULLET_RADIUS = 8;
   public static final float BULLET_SPEED = 5;
-
 
   public Bullet(final float red, final float green, final float blue) {
     this.red = red;
@@ -34,7 +32,7 @@ public class Bullet {
   
   public void setVelocity(final float speed, final float direction) {
     this.speed = speed; 
-    this.direction = direction;
+    this.direction = (direction + 180) / 57; //idk man math is strange
   }
   
   public void setPosition(final float x, final float y) {

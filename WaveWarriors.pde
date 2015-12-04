@@ -3,9 +3,9 @@ import org.gamecontrolplus.*;
 import net.java.games.input.*;
 
 public ControlIO control;
-public Controller controller1;
+public Controller controller1, controller2, controller3, controller4;
 
-public boolean mac = true;
+public boolean mac = false;
 
 public int state;
 

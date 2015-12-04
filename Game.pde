@@ -27,19 +27,19 @@ public class Game {
     this.players = new ArrayList<Player>();
 
     if (player1) {
-      players.add(new Player(1, 100, 100, false));
+      players.add(new Player(1, 100, 100, controller1, false));
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, false));
+      players.add(new Player(2, 1100, 100, controller1, false));
     }
 
     if (player3) {
-      players.add(new Player(3, 100, 500, false));
+      players.add(new Player(3, 100, 500, controller3, false));
     }
 
     if (player4) {
-      players.add(new Player(4, 1100, 500, false));
+      players.add(new Player(4, 1100, 500, controller4, false));
     }
 
     this.paused = false;
