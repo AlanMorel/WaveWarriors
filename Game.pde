@@ -31,7 +31,7 @@ public class Game {
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, controller1, false));
+      players.add(new Player(2, 1100, 100, controller1, true));
     }
 
     if (player3) {
@@ -76,7 +76,7 @@ public class Game {
     checkCollisions();
 
     if (!isIntroducingWave) {
-      updateWave();  // Don' allow wave to advance while introductory text is on screen
+      updateWave();
     }
 
     checkPowerUpSpawn();
@@ -127,8 +127,8 @@ public class Game {
   }
 
   void mouseClicked() {
-    for (final Player p : players) {
-      p.shoot();
+    for (Player player : players) {
+      player.shoot();
     }
   }
 
@@ -157,7 +157,7 @@ public class Game {
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
             toRemove.add(bullet);
             enemy.hit();
-            if (player.powerUp != null && player.powerUp.isDamage()) {
+            if (player.hasDamage()) {
               enemy.hit();
             }
           }
@@ -211,14 +211,14 @@ public class Game {
   }
 
   private void healAllPlayers() {
-    for (final Player p : players) {
-      p.respawn();
+    for (Player player : players) {
+      player.respawn();
     }
   }
 
   private void drawPlayers() {
-    for (final Player p : players) {
-      p.display();
+    for (Player player : players) {
+      player.display();
     }
   }
 

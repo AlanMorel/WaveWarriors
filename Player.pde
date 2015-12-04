@@ -1,7 +1,6 @@
 public class Player extends Entity {
 
   private static final int REVIVAL_DURATION = 100;
-  private static final int POWER_UP_DURATION = 250;
   private static final int FIRE_RATE = 10;
 
   public int id;
@@ -103,7 +102,7 @@ public class Player extends Entity {
 
     movePlayer();
 
-    if (powerUp != null && powerUp.isSpeed()) {
+    if (hasSpeed()) {
       movePlayer();
     }
 
@@ -130,9 +129,21 @@ public class Player extends Entity {
       x += speed;
     }
 
-    if (frameCount - pickUpTime > POWER_UP_DURATION) {
+    if (frameCount - pickUpTime > PowerUp.DURATION) {
       powerUp = null;
     }
+  }
+  
+ public boolean hasSpeed() {
+    return powerUp != null && powerUp.type == PowerUp.SPEED;
+  }
+
+  public boolean hasDamage() {
+    return powerUp != null && powerUp.type == PowerUp.DAMAGE;
+  }
+
+  public boolean hasFireRate() {
+    return powerUp != null && powerUp.type == PowerUp.FIRE_RATE;
   }
 
   public void fixPosition() {    
@@ -157,7 +168,7 @@ public class Player extends Entity {
   }
 
   public void shoot() {
-    if (down || partner != null || frameCount - lastShot < FIRE_RATE) {
+    if (down || partner != null || frameCount - lastShot < FIRE_RATE / (hasFireRate() ? 2 : 1)) {
       return;
     }
 
@@ -278,6 +289,12 @@ public class Player extends Entity {
 
   public void drawRevivalSystem() {
     if (partner == null) {
+      if (getPartner() != null && !down) {
+        int textX = id * 325 - 175;
+        textSize(18);
+        fill(0);
+        text("Hold 'X' to revive.", textX, height - 70);
+      }
       return;
     }
 

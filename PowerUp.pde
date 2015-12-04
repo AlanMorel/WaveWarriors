@@ -13,6 +13,8 @@ public class PowerUp {
 
   public static final float POWER_UP_RADIUS = 75;
 
+  private static final int DURATION = 500;
+
   private float red;
   private float green;
   private float blue;
@@ -70,18 +72,6 @@ public class PowerUp {
     fill(red, green, blue, 100 - (frameCount % 50) * 2);
     ellipse(x, y, POWER_UP_RADIUS + (frameCount % 50) * 2, POWER_UP_RADIUS + (frameCount % 50) * 2);
     image(icon, x - 16, y - 16);
-  }
-
-  public boolean isSpeed() {
-    return type == SPEED;
-  }
-
-  public boolean isDamage() {
-    return type == DAMAGE;
-  }
-
-  public boolean isFireRate() {
-    return type == FIRE_RATE;
   }
 }
 

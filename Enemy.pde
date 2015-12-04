@@ -23,14 +23,14 @@ public class Enemy extends Entity {
   public static final float BASE_BULLET_SPEED = 2;
   public static final float BULLET_SPEED_FACTOR = 0.2;
 
-  public static final int BASE_HEALTH = 4;
+  public static final int BASE_HEALTH = 3;
   public static final int HEALTH_FACTOR = 1;
 
   public static final int ENEMY_RADIUS = 50;
   public static final float MAX_COLOR_VALUE = 90;
 
-  public static final float WAVE_SPEED_FACTOR = 0.15;
-  public static final float SPEED_TO_REACH_SCREEN = 0.8;
+  public static final float WAVE_SPEED_FACTOR = 0.1;
+  public static final float SPEED_TO_REACH_SCREEN = 1;
   public static final float MINIMUM_SPEED = 0.1;
   public static final float MAXIMUM_SPEED = 1.1;
 
