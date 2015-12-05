@@ -51,5 +51,9 @@ public class Bullet {
     this.x = x;
     this.y = y;
   }
+  
+  public boolean isOutOfBounds(){
+    return x < -BULLET_RADIUS * 2 || x > width || y > height || y < -BULLET_RADIUS * 2;
+  }
 }
 

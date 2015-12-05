@@ -1,10 +1,11 @@
 public class Wave {
+  
   public ArrayList<Enemy> enemies;
   
   private int waveNum;
   
-  public static final int BASE_NUMBER_OF_ENEMIES = 2;
-  public static final float ENEMIES_PER_WAVE_FACTOR = 2.0;
+  public static final int BASE_NUMBER_OF_ENEMIES = 3;
+  public static final int ENEMIES_PER_WAVE_FACTOR = 1;
   public static final int MAXIMUM_DISTANCE_AWAY_FROM_SCREEN = 500;
   public static final int MINIMUM_DISTANCE_AWAY_FROM_SCREEN = 100;
 

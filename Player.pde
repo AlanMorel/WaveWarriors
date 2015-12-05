@@ -1,7 +1,8 @@
 public class Player extends Entity {
 
   private static final int REVIVAL_DURATION = 100;
-  private static final int FIRE_RATE = 10;
+  private static final int BULLET_RATE = 10;
+  public static final int LASER_RATE = 1;
 
   public int id;
   public ArrayList<Bullet> bullets;
@@ -19,6 +20,13 @@ public class Player extends Entity {
   public float aim;
   public int lastShot;
 
+  public boolean laser;
+  public int lastLaser;
+  public float laserX;
+  public float laserY;
+  
+  public boolean leftBumperState;
+
   public Player(int id, int x, int y, Controller controller, boolean down) {
     super(x, y, 10, 75);
     this.id = id;
@@ -29,6 +37,7 @@ public class Player extends Entity {
     this.controller = controller;
     this.down = down;
     this.aim = 0;
+    this.laser = true;
   }
 
   public boolean hasSpeed() {
@@ -96,9 +105,14 @@ public class Player extends Entity {
     down = false;
   }
 
+  public void heal() {
+    hp = maxHp;
+  }
+
   public void update() {
 
     updateAim();
+    checkWeaponChange();
 
     for (Bullet bullet : bullets) {
       bullet.update(this);
@@ -116,7 +130,7 @@ public class Player extends Entity {
       return;
     }
 
-    if (controller.getLeftT() < -0.5) {
+    if (isFiring()) {
       shoot();
     }
 
@@ -127,6 +141,13 @@ public class Player extends Entity {
     }
 
     fixPosition();
+  }
+
+  public void checkWeaponChange() {
+    if (!leftBumperState && controller.leftB.pressed()) {
+      laser = !laser;
+    }
+    leftBumperState = controller.leftB.pressed();
   }
 
   public void movePlayer() {
@@ -171,12 +192,20 @@ public class Player extends Entity {
     }
   }
 
+  public boolean isFiring() {
+    return controller.getLeftT() < -0.5;
+  }
+
   public void updateAim() {
     aim = (float) (Math.atan2(controller.getRightY(), controller.getRightX()) * 180.0 / Math.PI);
   }
 
+  public boolean cantShoot() {
+    return down || partner != null || frameCount - lastShot < BULLET_RATE / (hasFireRate() ? 2 : 1) || laser;
+  }
+
   public void shoot() {
-    if (down || partner != null || frameCount - lastShot < FIRE_RATE / (hasFireRate() ? 2 : 1)) {
+    if (cantShoot()) {
       return;
     }
     Bullet bullet = new Bullet(41, 128, 185);
@@ -192,6 +221,7 @@ public class Player extends Entity {
     hp--;
     if (hp <= 0) {
       down = true;
+      powerUp = null;
       hp = 0;
     }
   }
@@ -205,12 +235,23 @@ public class Player extends Entity {
     drawDownEffect();
     drawPlayer();
     drawId();
+    drawLaser();
     drawCursor();
     drawBullets();
     drawHpBar();
     drawPowerUp();
     drawRevivalSystem();
     drawCrosshairs();
+  }
+
+  private void drawLaser() {
+    if (!laser || down || !isFiring()) {
+      return;
+    }
+    float x1 = x + (float) (radius * Math.sin(Math.toRadians(90 - aim)));
+    float y1 = y + (float) (radius * Math.sin(Math.toRadians(aim)));
+    stroke(255, 0, 0, 100);
+    line(x1, y1, laserX, laserY);
   }
 
   private void drawDownEffect() {
@@ -283,7 +324,6 @@ public class Player extends Entity {
     }
   }
 
-
   public void drawPowerUp() {
     if (powerUp == null) {
       return;
@@ -293,7 +333,15 @@ public class Player extends Entity {
 
     textSize(18);
     fill(0);
-    text(powerUp.name + " power up active", textX, height - 100);
+    text(powerUp.name + " active", textX, height - 110);
+
+    int powerUpBar = id * 325 - 175;
+    rectMode(CORNER);
+    fill(0);
+    rect(powerUpBar - 75, height - 100, 150, 15, 3);
+    float shift = (float) Math.sin(frameCount / (float) 5) * (float) 50; 
+    fill(powerUp.red + shift, powerUp.green + shift, powerUp.blue + shift);
+    rect(powerUpBar - 75, height - 100, (frameCount - pickUpTime) * 150 / PowerUp.DURATION, 15, 3);
   }
 
   public void drawRevivalSystem() {
