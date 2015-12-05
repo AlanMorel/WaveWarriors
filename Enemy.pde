@@ -88,8 +88,6 @@ public class Enemy extends Entity {
     rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
-
-
   // Update Methods
   public void update() {
     advanceToNearestAlivePlayer();
@@ -107,9 +105,6 @@ public class Enemy extends Entity {
     }
   }
 
-
-
-  // Shooting Methods
   public void fireAtNearestAlivePlayer() {
     final Player nearestPlayer = getNearestAlivePlayer();
     fireAtPlayer(nearestPlayer);
@@ -121,13 +116,7 @@ public class Enemy extends Entity {
       return;
     }
     
-    final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
-    final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
-
-    final float deltaX = x - targetX;
-    final float deltaY = y - targetY;
-    final float direction = atan2(deltaY, deltaX);
-
+    float direction = (float) (Math.atan2(player.y - y, player.x - x) * 180.0 / Math.PI);
     final Bullet bullet = new Bullet(rFillColor, gFillColor, bFillColor);
     bullet.setPosition(x, y);
     bullet.setVelocity(bulletSpeed, direction);
@@ -149,6 +138,12 @@ public class Enemy extends Entity {
     }
 
     Player nearestPlayer = getNearestAlivePlayer();
+    
+    if (nearestPlayer == null) {
+      println("Cannot fire at nearest player - no players detected."); 
+      return;
+    }
+    
     float deltaY = y - (nearestPlayer.y + yTargetOffset);
     float deltaX = x - (nearestPlayer.x + xTargetOffset);
     float direction  = atan2(deltaY, deltaX);
