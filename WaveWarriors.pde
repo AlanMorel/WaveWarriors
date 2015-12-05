@@ -2,7 +2,8 @@ import org.gamecontrolplus.gui.*;
 import org.gamecontrolplus.*;
 import net.java.games.input.*;
 import ddf.minim.*;
- 
+import java.util.Map;
+
 Minim minim;
 AudioSample bulletSound, powerUpSound;
 AudioPlayer backgroundMusic;
@@ -10,7 +11,7 @@ AudioPlayer backgroundMusic;
 public ControlIO control;
 public Controller controller1, controller2, controller3, controller4;
 
-public boolean mac = true;
+public boolean mac = false;
 
 public int state;
 
@@ -47,6 +48,7 @@ void draw() {
     game.update();
     game.draw();
   }
+    controller1.update();
 }
 
 boolean[] keys = new boolean[255];

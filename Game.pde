@@ -23,6 +23,9 @@ public class Game {
 
   private int lastPowerUpSpawn;
 
+  private int lastPause;
+  private int pausedFrames;
+
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
     this.background = loadImage("gamebackground.png");
 
@@ -51,6 +54,8 @@ public class Game {
     this.waveLevelFontTransparency = 0;
     this.waveTextX = 0;
     this.introFrame = 0;
+    this.lastPause = 0;
+    this.pausedFrames = 0;
 
     this.isIntroducingWave = true;
 
@@ -58,9 +63,28 @@ public class Game {
     this.lastPowerUpSpawn = 0;
   }
 
+  public int frameCount() {
+    return frameCount - getPausedFrames();
+  }
+
+  public int getPausedFrames() {
+    if (lastPause > 0) {
+      return pausedFrames + (frameCount - lastPause);
+    } else {
+      return pausedFrames;
+    }
+  }
+
   public void update() {
-    if (keys[BACKSPACE] || controller1.start.pressed()) {
-      paused = !paused;
+    if (keys[BACKSPACE] || controller1.justPressed(controller1.start)) {
+      if (paused) {
+        pausedFrames += frameCount - lastPause;
+        paused = false;
+        lastPause = 0;
+      } else {
+        lastPause = frameCount;
+        paused = true;
+      }
       keys[BACKSPACE] = false;
     }
 
@@ -114,7 +138,7 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-    
+
     drawPowerUps();
     drawPlayers();
 
@@ -122,11 +146,11 @@ public class Game {
       introduceWave(waveLevel);
     }
 
+    wave.display();
+    
     if (paused) {
       drawPauseMenu();
     }
-    
-    wave.display();
   }
 
   void mouseClicked() {
@@ -165,7 +189,7 @@ public class Game {
       float y0 = player.y + (float) (player.radius * Math.sin(Math.toRadians(player.aim)));
       float x1 = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
       float y1 = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
-      
+
       for (Enemy enemy : wave.enemies) {
         if (collided(x0, y0, x1, y1, enemy.x, enemy.y, enemy.radius)) {
           float dist = dist(player.x, player.y, enemy.x, enemy.y);
@@ -175,10 +199,10 @@ public class Game {
           }
         }
       }
-      
+
       if (target != null) {
-        if (frameCount - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
-          player.lastLaser = frameCount;
+        if (game.frameCount() - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
+          player.lastLaser = game.frameCount();
           target.hitByLaser();
           if (player.hasDamage()) {
             target.hitByLaser();
@@ -255,7 +279,7 @@ public class Game {
             }
           } else {
             player.powerUp = powerUp;
-            player.pickUpTime = frameCount;
+            player.pickUpTime = game.frameCount();
           }
           powerUpSound.trigger();
           toRemove.add(powerUp);
@@ -340,7 +364,7 @@ public class Game {
   }
 
   private boolean shouldSpawnPowerUp() {
-    return frameCount - lastPowerUpSpawn >= POWER_UP_SPAWN_DELAY && powerUps.size() < 3;
+    return game.frameCount() - lastPowerUpSpawn >= POWER_UP_SPAWN_DELAY && powerUps.size() < 3;
   }
 
   private PowerUp getRandomPowerUp() {
@@ -353,7 +377,7 @@ public class Game {
   private void spawnPowerUp() {
     PowerUp powerUp = getRandomPowerUp();
     powerUps.add(powerUp);
-    lastPowerUpSpawn = frameCount;
+    lastPowerUpSpawn = game.frameCount();
   }
 }
 

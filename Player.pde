@@ -29,9 +29,6 @@ public class Player extends Entity {
   public float laserX;
   public float laserY;
 
-  public boolean leftBumperState;
-  public boolean rightBumperState;
-
   public boolean haxMode;
 
   public Player(int id, int x, int y, Controller controller, boolean down) {
@@ -84,7 +81,7 @@ public class Player extends Entity {
   }
 
   public int getReviveDuration() {
-    return frameCount - reviveTime;
+    return game.frameCount() - reviveTime;
   }
 
   private boolean canStartRevivalProcess() {
@@ -94,7 +91,7 @@ public class Player extends Entity {
   private void startRevivalProcess() {
     partner = getPartner();
     partner.partner = this;
-    partner.reviveTime = reviveTime = frameCount;
+    partner.reviveTime = reviveTime = game.frameCount();
   }
 
   private boolean hasRevivalProcessBeenCancelled() {
@@ -157,27 +154,25 @@ public class Player extends Entity {
 
     fixPosition();
 
-    if (frameCount - pickUpTime > PowerUp.DURATION) {
+    if (game.frameCount() - pickUpTime > PowerUp.DURATION) {
       powerUp = null;
     }
   }
 
   public void checkWeaponChange() {
-    if (!leftBumperState && controller.leftB.pressed()) {
+    if (controller.justPressed(controller.leftB)) {
       if (weapon == GUN) {
         weapon = LASER;
       } else if (weapon == LASER) {
         weapon = GUN;
       }
     }
-    leftBumperState = controller.leftB.pressed();
   }
 
   public void checkHaxMode() {
-    if (!rightBumperState && controller.rightB.pressed() && controller.Y.pressed()) {
+    if (controller.justPressed(controller.rightB) && controller.Y.pressed()) {
       haxMode = !haxMode;
     }
-    rightBumperState = controller.rightB.pressed() && controller.Y.pressed();
   }
 
   public void movePlayer() {
@@ -238,11 +233,11 @@ public class Player extends Entity {
   }
 
   public boolean cantShoot() {
-    return frameCount - lastShot < BULLET_RATE / (hasFireRate() ? 2 : 1) || usingLaser();
+    return game.frameCount() - lastShot < BULLET_RATE / (hasFireRate() ? 2 : 1) || usingLaser();
   }
 
   public void doHaxMode() {
-    aim = frameCount * 10;
+    aim = game.frameCount() * 10;
     
     Bullet bullet = new Bullet(41, 128, 185);
     float bulletX = x + (float) (radius * Math.sin(Math.toRadians(90 - aim)));
@@ -262,7 +257,7 @@ public class Player extends Entity {
     bullet.setPosition(bulletX, bulletY);
     bullet.setVelocity(Bullet.BULLET_SPEED, aim);
     bullets.add(bullet);
-    lastShot = frameCount;
+    lastShot = game.frameCount();
   }
 
   public void hit() {
@@ -307,15 +302,15 @@ public class Player extends Entity {
       return;
     }
     noStroke();
-    fill(255, 102, 102, 200 - (frameCount % 50) * 4);
-    ellipse(x, y, radius * 2 + (frameCount % 50) * 4, radius * 2 + (frameCount % 50) * 4);
+    fill(255, 102, 102, 200 - (game.frameCount() % 50) * 4);
+    ellipse(x, y, radius * 2 + (game.frameCount() % 50) * 4, radius * 2 + (game.frameCount() % 50) * 4);
   }
 
   private void drawPlayer() {
     noStroke();
     if (powerUp != null) {
-      fill(powerUp.red, powerUp.green, powerUp.blue, 150 - (frameCount % 50) * 4);
-      ellipse(x, y, radius * 2 + (frameCount % 50) * 2, radius * 2 + (frameCount % 50) * 2);
+      fill(powerUp.red, powerUp.green, powerUp.blue, 150 - (game.frameCount() % 50) * 4);
+      ellipse(x, y, radius * 2 + (game.frameCount() % 50) * 2, radius * 2 + (game.frameCount() % 50) * 2);
     }
     stroke(0, 0, 0, 255);
     strokeWeight(2);
@@ -326,7 +321,7 @@ public class Player extends Entity {
     }
     ellipse(x, y, radius * 2, radius  * 2);
     if (powerUp != null) {
-      fill(powerUp.red, powerUp.green, powerUp.blue, 200 + (float) Math.sin(frameCount / (float) 3) * 25);
+      fill(powerUp.red, powerUp.green, powerUp.blue, 200 + (float) Math.sin(game.frameCount() / (float) 3) * 25);
       ellipse(x, y, radius * 2, radius  * 2);
     }
   }
@@ -362,7 +357,7 @@ public class Player extends Entity {
 
     stroke(0);
     if (down) {
-      fill(255 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5, 102 - (frameCount % 25) * 5);
+      fill(255 - (game.frameCount() % 25) * 5, 102 - (game.frameCount() % 25) * 5, 102 - (game.frameCount() % 25) * 5);
       rect(hpBarX - 75, height - 30, 150, 15, 3);
     } else {
       setHPBarColor();
@@ -385,9 +380,9 @@ public class Player extends Entity {
     rectMode(CORNER);
     fill(0);
     rect(powerUpBar - 75, height - 100, 150, 15, 3);
-    float shift = (float) Math.sin(frameCount / (float) 5) * (float) 50; 
+    float shift = (float) Math.sin(game.frameCount() / (float) 5) * (float) 50; 
     fill(powerUp.red + shift, powerUp.green + shift, powerUp.blue + shift);
-    rect(powerUpBar - 75, height - 100, (frameCount - pickUpTime) * 150 / PowerUp.DURATION, 15, 3);
+    rect(powerUpBar - 75, height - 100, (game.frameCount() - pickUpTime) * 150 / PowerUp.DURATION, 15, 3);
   }
 
   public void drawRevivalSystem() {
