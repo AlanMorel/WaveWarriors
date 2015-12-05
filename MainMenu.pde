@@ -1,6 +1,6 @@
 public class MainMenu {
 
-  private PImage background, foreground, xboxReady, xboxNotReady;
+  private PImage background, foreground, ready, notReady;
   private float offset;
 
   private ArrayList<Cursor> cursors;
@@ -14,8 +14,8 @@ public class MainMenu {
   public MainMenu() {
     this.background = loadImage("mainmenubackground.png");
     this.foreground = loadImage("mainmenuforeground.png");
-    this.xboxReady = loadImage("xboxready.png");
-    this.xboxNotReady = loadImage("xboxnotready.png");
+    this.ready = loadImage("xboxready.png");
+    this.notReady = loadImage("xboxnotready.png");
 
     this.offset = 0;
 
@@ -125,8 +125,8 @@ public class MainMenu {
     drawReadyStatus(4, isPlayer4Ready());
   }
 
-  private void drawReadyStatus(int player, boolean ready) {
-    image(ready ? xboxReady : xboxNotReady, (player - 1) * 340 + 70, 550);
+  private void drawReadyStatus(int player, boolean playerReady) {
+    image(playerReady ? ready : notReady, (player - 1) * 340 + 70, 550);
   }
 
   private boolean isPlayer1Ready() {

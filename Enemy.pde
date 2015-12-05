@@ -86,17 +86,6 @@ public class Enemy extends Entity {
     rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
 
-  private void setHPBarColor() {
-    float percent = hp * 100 / maxHp;
-    if (percent < 30) {
-      fill(255, 102, 102);
-    } else if (percent < 60) {
-      fill(241, 196, 15);
-    } else {
-      fill(77, 255, 136);
-    }
-  }
-
   // Update Methods
   public void update() {
     advanceToNearestAlivePlayer();
@@ -108,18 +97,13 @@ public class Enemy extends Entity {
   }
 
   public void updateShootingStatus() {
-    if ((--fireDelay == 0)) {
-      fireAtNearestAlivePlayer();
+    if (--fireDelay == 0) {
+      fireAtPlayer(getNearestAlivePlayer());
       updateFireDelay();
     }
   }
 
-  public void fireAtNearestAlivePlayer() {
-    final Player nearestPlayer = getNearestAlivePlayer();
-    fireAtPlayer(nearestPlayer);
-  }
-
-  public void fireAtPlayer(final Player player) {
+  public void fireAtPlayer(Player player) {
     if (player == null) {
       println("Cannot fire at nearest player - no players detected."); 
       return;
@@ -189,14 +173,14 @@ public class Enemy extends Entity {
   private Player getNearestAlivePlayer() {
     Player closestPlayer = null;
     float minDistance = Integer.MAX_VALUE;
-    for (final Player p : game.players) {
-      if ((p == null) || (p.down)) {
+    for (Player player : game.players) {
+      if (player == null || player.down) {
         continue;
       }
-      final float distanceFromPlayer = dist(x, y, p.x, p.y);
+      final float distanceFromPlayer = dist(x, y, player.x, player.y);
       if (distanceFromPlayer < minDistance) {
         minDistance = distanceFromPlayer;
-        closestPlayer = p;
+        closestPlayer = player;
       }
     }
     return closestPlayer;

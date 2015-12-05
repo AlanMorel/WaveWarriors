@@ -114,9 +114,9 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-
-    drawPlayers();
+    
     drawPowerUps();
+    drawPlayers();
 
     if (isIntroducingWave) {
       introduceWave(waveLevel);
@@ -125,6 +125,7 @@ public class Game {
     if (paused) {
       drawPauseMenu();
     }
+    
     wave.display();
   }
 
@@ -153,35 +154,38 @@ public class Game {
   }
 
   public void checkPlayerLaserCollisions() {
-    Enemy target = null;
-    float lowestDistance = Integer.MAX_VALUE;
     for (Player player : players) {
-      if (!player.laser || player.down || !player.isFiring()) {
+      if (player.usingGun() || player.down || !player.isFiring()) {
         continue;
       }
+      Enemy target = null;
+      float targetDistance = Integer.MAX_VALUE;
+
       float x0 = player.x + (float) (player.radius * Math.sin(Math.toRadians(90 - player.aim)));
       float y0 = player.y + (float) (player.radius * Math.sin(Math.toRadians(player.aim)));
       float x1 = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
       float y1 = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
+      
       for (Enemy enemy : wave.enemies) {
         if (collided(x0, y0, x1, y1, enemy.x, enemy.y, enemy.radius)) {
           float dist = dist(player.x, player.y, enemy.x, enemy.y);
-          if (dist < lowestDistance) {
-            lowestDistance = dist;
+          if (dist < targetDistance) {
+            targetDistance = dist;
             target = enemy;
           }
         }
       }
+      
       if (target != null) {
-        if (frameCount - player.lastLaser > Player.LASER_RATE / ( player.hasFireRate() ? 2 : 1)) {
+        if (frameCount - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
           player.lastLaser = frameCount;
           target.hitByLaser();
-          if (player.hasDamage()){
-              target.hitByLaser();
+          if (player.hasDamage()) {
+            target.hitByLaser();
           }
         }
-        player.laserX = player.x + (float) (lowestDistance * Math.sin(Math.toRadians(90 - player.aim)));
-        player.laserY = player.y + (float) (lowestDistance * Math.sin(Math.toRadians(player.aim)));
+        player.laserX = player.x + (float) (targetDistance * Math.sin(Math.toRadians(90 - player.aim)));
+        player.laserY = player.y + (float) (targetDistance * Math.sin(Math.toRadians(player.aim)));
       } else {
         player.laserX = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
         player.laserY = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
@@ -243,10 +247,10 @@ public class Game {
     for (PowerUp powerUp : powerUps) {
       for (Player player : players) {
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
-          if (powerUp.type == PowerUp.HEAL){
+          if (powerUp.type == PowerUp.HEAL) {
             player.heal();
-          } else if (powerUp.type == PowerUp.NUKE){
-            for (Enemy enemy : wave.enemies){
+          } else if (powerUp.type == PowerUp.NUKE) {
+            for (Enemy enemy : wave.enemies) {
               enemy.hitByNuke();
             }
           } else {
