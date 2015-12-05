@@ -5,7 +5,7 @@ public class Controller {
   public ControlDevice device;
 
   public ControlButton A, B, X, Y, leftB, rightB, back, start, leftClick, rightClick;
-  
+
   public ControlSlider leftX;
   public ControlSlider leftY;
 
@@ -14,6 +14,8 @@ public class Controller {
 
   public ControlSlider leftT;
   public ControlSlider rightT;
+
+  public HashMap<ControlButton, Boolean> buttonStates;
 
   public Controller(int player) {
     this.player = player;
@@ -30,7 +32,7 @@ public class Controller {
     this.start = device.getButton(mac ? "7" : "Button 7");
     this.leftClick = device.getButton(mac ? "8" : "Button 8");
     this.rightClick = device.getButton(mac ? "9" : "Button 9");
-    
+
     this.leftX = device.getSlider(mac ? "x" : "X Axis");
     this.leftX.setTolerance(0.15);
 
@@ -42,6 +44,18 @@ public class Controller {
 
     this.leftT = device.getSlider(mac ? "z" : "Z Axis");
     this.rightT = device.getSlider(mac ? "rz" : "Z Rotation");
+
+    buttonStates = new HashMap<ControlButton, Boolean>();
+    buttonStates.put(A, false);
+    buttonStates.put(B, false);
+    buttonStates.put(X, false);
+    buttonStates.put(Y, false);
+    buttonStates.put(leftB, false);
+    buttonStates.put(rightB, false);
+    buttonStates.put(back, false);
+    buttonStates.put(start, false);
+    buttonStates.put(leftClick, false);
+    buttonStates.put(rightClick, false);
   }
 
   public float getLeftX() {
@@ -67,5 +81,17 @@ public class Controller {
   public float getRightT() {
     return rightT.getValue();
   }
-}
 
+  public void update() {
+    for (Map.Entry entry : buttonStates.entrySet ()) {
+      ControlButton button = (ControlButton) entry.getKey();
+      entry.setValue(button.pressed());
+    }
+  }
+
+  public boolean justPressed(ControlButton button) {
+    boolean justPressed = (!(boolean) buttonStates.get(button)) && button.pressed();
+    buttonStates.put(button, false);
+    return justPressed;
+  }
+}

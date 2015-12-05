@@ -101,9 +101,9 @@ public class PowerUp {
     fill(red, green, blue, 50);
     pushMatrix();
     translate(x, y);
-    rotate(frameCount/ (float) 10);
-    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) frameCount / 5) * 50, POWER_UP_RADIUS + (float) Math.sin((float) frameCount / 10) *  50);
-    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) frameCount / 10) * 50, POWER_UP_RADIUS + (float) Math.sin((float) frameCount / 5) *  50);
+    rotate(game.frameCount() / (float) 10);
+    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 5) * 50, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 10) *  50);
+    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 10) * 50, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 5) *  50);
     rotate(0);
     popMatrix();
     fill(red, green, blue);
