@@ -4,6 +4,7 @@ public class Player extends Entity {
   private static final int LASER = 1;
 
   private static final int REVIVE_TIME = 100;
+  private static final int ULTIMATE_DURATION = 500;
 
   public static final int BULLET_RATE = 10;
   public static final int LASER_RATE = 1;
@@ -18,6 +19,9 @@ public class Player extends Entity {
   public PowerUp powerUp;
   public int pickUpTime;
 
+  public int ultimateTime;
+  public int energy;
+
   public Controller controller;
 
   public int weapon;
@@ -29,8 +33,6 @@ public class Player extends Entity {
   public float laserX;
   public float laserY;
 
-  public boolean haxMode;
-
   public Player(int id, int x, int y, Controller controller, boolean down) {
     super(x, y, 10, 75);
     this.id = id;
@@ -41,6 +43,8 @@ public class Player extends Entity {
     this.down = down;
     this.aim = 0;
     this.weapon = GUN;
+    this.energy = 0;
+    this.ultimateTime = 0;
   }
 
   public boolean usingLaser() {
@@ -69,6 +73,10 @@ public class Player extends Entity {
 
   public boolean hasInvincibility() {
     return powerUp != null && powerUp.type == PowerUp.INVINCIBILITY;
+  }
+
+  public boolean hasAimBot() {
+    return powerUp != null && powerUp.type == PowerUp.AIM_BOT;
   }
 
   private Player getPartner() {
@@ -120,11 +128,17 @@ public class Player extends Entity {
     hp = maxHp;
   }
 
-  public void update() {
+  public void gainEnergy() {
+    if (isInUltimate() || down) {
+      return;
+    }
+    energy += 1;
+  }
 
+  public void update() {
     updateAim();
     checkWeaponChange();
-    checkHaxMode();
+    checkUltimate();
 
     for (Bullet bullet : bullets) {
       bullet.update(this);
@@ -142,8 +156,8 @@ public class Player extends Entity {
       return;
     }
 
-    if (haxMode) {
-      doHaxMode();
+    if (isInUltimate()) {
+      doUltimate();
     } else {
       if (isFiring()) {
         shoot();
@@ -169,10 +183,15 @@ public class Player extends Entity {
     }
   }
 
-  public void checkHaxMode() {
-    if (controller.justPressed(controller.rightB) && controller.Y.pressed()) {
-      haxMode = !haxMode;
+  public void checkUltimate() {
+    if (controller.X.pressed() && controller.Y.pressed() && energy >= 100) {
+      ultimateTime = game.frameCount();
+      ultimateSound.trigger();
     }
+  }
+
+  public boolean isInUltimate() {
+    return ultimateTime > 0 && game.frameCount() - ultimateTime < ULTIMATE_DURATION;
   }
 
   public void movePlayer() {
@@ -229,22 +248,39 @@ public class Player extends Entity {
   }
 
   public void updateAim() {
-    aim = (float) (Math.atan2(controller.getRightY(), controller.getRightX()) * 180.0 / Math.PI);
+    if (hasAimBot()) {
+      Enemy target = getClosestEnemy();
+      if (target != null) {
+        float targetDistance = dist(x, y, target.x, target.y);
+        aim = (float) Math.toDegrees((Math.atan2(target.y - y, target.x - x)));
+        laserX = x + (float) (targetDistance * Math.sin(Math.toRadians(90 - aim)));
+        laserY = y + (float) (targetDistance * Math.sin(Math.toRadians(aim)));
+      }
+    } else {
+      aim = (float) (Math.atan2(controller.getRightY(), controller.getRightX()) * 180.0 / Math.PI);
+    }
   }
 
   public boolean cantShoot() {
     return game.frameCount() - lastShot < BULLET_RATE / (hasFireRate() ? 2 : 1) || usingLaser();
   }
 
-  public void doHaxMode() {
+  public void doUltimate() {
     aim = game.frameCount() * 10;
-    
+
     Bullet bullet = new Bullet(41, 128, 185);
     float bulletX = x + (float) (radius * Math.sin(Math.toRadians(90 - aim)));
     float bulletY = y + (float) (radius * Math.sin(Math.toRadians(aim)));
     bullet.setPosition(bulletX, bulletY);
     bullet.setVelocity(Bullet.BULLET_SPEED, aim);
     bullets.add(bullet);
+
+    energy = 100 - (game.frameCount() - ultimateTime) * 100 / ULTIMATE_DURATION;
+
+    if (energy <= 0) {
+      energy = 0;
+      ultimateTime = 0;
+    }
   }
 
   public void shoot() {
@@ -266,6 +302,7 @@ public class Player extends Entity {
       down = true;
       powerUp = null;
       hp = 0;
+      ultimateTime = 0;
     }
   }
 
@@ -282,6 +319,7 @@ public class Player extends Entity {
     drawCursor();
     drawBullets();
     drawHpBar();
+    drawEnergyBar();
     drawPowerUp();
     drawRevivalSystem();
     drawCrosshairs();
@@ -312,6 +350,7 @@ public class Player extends Entity {
       fill(powerUp.red, powerUp.green, powerUp.blue, 150 - (game.frameCount() % 50) * 4);
       ellipse(x, y, radius * 2 + (game.frameCount() % 50) * 2, radius * 2 + (game.frameCount() % 50) * 2);
     }
+
     stroke(0, 0, 0, 255);
     strokeWeight(2);
     if (down) {
@@ -323,6 +362,14 @@ public class Player extends Entity {
     if (powerUp != null) {
       fill(powerUp.red, powerUp.green, powerUp.blue, 200 + (float) Math.sin(game.frameCount() / (float) 3) * 25);
       ellipse(x, y, radius * 2, radius  * 2);
+    }
+    if (isInUltimate()) {
+      fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5);
+      ellipse(x, y, radius * 2, radius  * 2);
+      noStroke();
+      fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5, 100 - (game.frameCount() % 50) * 2);    
+      ellipse(x, y, radius * 2 + (game.frameCount() % 50) * 25, radius * 2 + (game.frameCount() % 50) * 25);
+   
     }
   }
 
@@ -349,19 +396,38 @@ public class Player extends Entity {
     int hpBarX = id * 325 - 175;
 
     textSize(18);
+
+    if (energy < 100) {
+      fill(0);
+      text("Player " + id, hpBarX, height - 60);
+    } else {
+      fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5);
+      text("Press X + Y to use Ultimate", hpBarX, height - 60);
+    }
+
     fill(0);
-    text("Player " + id, hpBarX, height - 40);
-
     rectMode(CORNER);
-    rect(hpBarX - 75, height - 30, 150, 15, 3);
-
     stroke(0);
+    rect(hpBarX - 75, height - 50, 150, 15, 3);
+    rect(hpBarX - 75, height - 25, 150, 15, 3);
+
     if (down) {
       fill(255 - (game.frameCount() % 25) * 5, 102 - (game.frameCount() % 25) * 5, 102 - (game.frameCount() % 25) * 5);
-      rect(hpBarX - 75, height - 30, 150, 15, 3);
+      rect(hpBarX - 75, height - 50, 150, 15, 3);
     } else {
       setHPBarColor();
-      rect(hpBarX - 75, height - 30, 150 * hp / maxHp, 15, 3);
+      rect(hpBarX - 75, height - 50, 150 * hp / maxHp, 15, 3);
+    }
+  }
+
+  public void drawEnergyBar() {
+    int energyBarX = id * 325 - 175;
+    if (energy > 100) {
+      fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5);
+      rect(energyBarX - 75, height - 25, 150, 15, 3);
+    } else {
+      fill(141 + energy, 96 + energy, -85 + energy);
+      rect(energyBarX - 75, height - 25, 150 * energy / 100, 15, 3);
     }
   }
 
@@ -415,6 +481,43 @@ public class Player extends Entity {
     float crossY = y + (float) (distance * Math.sin(Math.toRadians(aim)));
     fill(0);
     ellipse(crossX, crossY, radius, radius);
+  }
+
+  private Enemy getClosestEnemy() {
+    Enemy target = null;
+    float targetDistance = Integer.MAX_VALUE;
+
+    for (Enemy enemy : game.wave.enemies) {
+      float dist = dist(x, y, enemy.x, enemy.y);
+      if (dist < targetDistance) {
+        targetDistance = dist;
+        target = enemy;
+      }
+    }
+
+    return target;
+  }
+
+  private Enemy getClosestHitEnemy() {
+
+    Enemy target = null;
+    float targetDistance = Integer.MAX_VALUE;
+
+    float x0 = x + (float) (radius * Math.sin(Math.toRadians(90 - aim)));
+    float y0 = y + (float) (radius * Math.sin(Math.toRadians(aim)));
+    float x1 = x + (float) (width * Math.sin(Math.toRadians(90 - aim)));
+    float y1 = y + (float) (width * Math.sin(Math.toRadians(aim)));
+
+    for (Enemy enemy : game.wave.enemies) {
+      if (game.collided(x0, y0, x1, y1, enemy.x, enemy.y, enemy.radius)) {
+        float dist = dist(x, y, enemy.x, enemy.y);
+        if (dist < targetDistance) {
+          targetDistance = dist;
+          target = enemy;
+        }
+      }
+    }
+    return target;
   }
 }
 

@@ -21,10 +21,10 @@ public class Enemy extends Entity {
   private float shootingMarginOfError;
 
   public static final float BASE_BULLET_SPEED = 2;
-  public static final float BULLET_SPEED_FACTOR = 0.1;
+  public static final float BULLET_SPEED_FACTOR = 0.05;
 
   public static final int BASE_HEALTH = 100;
-  public static final int HEALTH_FACTOR = 10;
+  public static final int HEALTH_FACTOR = 5;
 
   public static final int ENEMY_RADIUS = 50;
   public static final float MAX_COLOR_VALUE = 100;

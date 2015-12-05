@@ -19,7 +19,7 @@ public class Game {
   public static final int BASE_FONT_SIZE = 100;
   public static final int INTRO_FRAME_LENGTH = 150;
 
-  public static final int POWER_UP_SPAWN_DELAY = 500;
+  public static final int POWER_UP_SPAWN_DELAY = 1000;
 
   private int lastPowerUpSpawn;
 
@@ -162,10 +162,10 @@ public class Game {
   public void drawPauseMenu() {
     rectMode(CORNER);
     noStroke();
-    fill(0, 150);
+    fill(0, 200);
     rect(0, 0, width, height);
 
-    textSize(100);
+    textSize(72);
     fill(255, 255);
     text("Game Paused", width / 2, height / 2);
   }
@@ -176,31 +176,19 @@ public class Game {
     checkPlayerPowerUpCollisions();
     checkPlayerLaserCollisions();
   }
+ 
+  
 
   public void checkPlayerLaserCollisions() {
     for (Player player : players) {
       if (player.usingGun() || player.down || !player.isFiring()) {
         continue;
       }
-      Enemy target = null;
-      float targetDistance = Integer.MAX_VALUE;
-
-      float x0 = player.x + (float) (player.radius * Math.sin(Math.toRadians(90 - player.aim)));
-      float y0 = player.y + (float) (player.radius * Math.sin(Math.toRadians(player.aim)));
-      float x1 = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
-      float y1 = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
-
-      for (Enemy enemy : wave.enemies) {
-        if (collided(x0, y0, x1, y1, enemy.x, enemy.y, enemy.radius)) {
-          float dist = dist(player.x, player.y, enemy.x, enemy.y);
-          if (dist < targetDistance) {
-            targetDistance = dist;
-            target = enemy;
-          }
-        }
-      }
-
-      if (target != null) {
+      
+      Enemy target = player.getClosestHitEnemy();
+      
+      if (target != null) {      
+        float targetDistance = dist(player.x, player.y, target.x, target.y);
         if (game.frameCount() - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
           player.lastLaser = game.frameCount();
           target.hitByLaser();
@@ -228,6 +216,7 @@ public class Game {
         for (Enemy enemy : wave.enemies) {
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS / 2)) {
             toRemove.add(bullet);
+            player.gainEnergy();
             bulletSound.trigger();
             enemy.hitByBullet();
             if (player.hasDamage()) {
@@ -270,6 +259,9 @@ public class Game {
     ArrayList<PowerUp> toRemove = new ArrayList<PowerUp>();
     for (PowerUp powerUp : powerUps) {
       for (Player player : players) {
+        if (player.down){
+          continue;
+        }
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
           if (powerUp.type == PowerUp.HEAL) {
             player.heal();
@@ -370,7 +362,7 @@ public class Game {
   private PowerUp getRandomPowerUp() {
     float x = random(width - 100) + 50;
     float y = random(height - 100) + 50;
-    int type = int(random(7));
+    int type = int(random(8));
     return new PowerUp(x, y, type);
   }
 
