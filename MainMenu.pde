@@ -1,7 +1,9 @@
 public class MainMenu {
 
-  private PImage background, foreground;
+  private PImage background, foreground, ready, notReady;
   private float offset;
+
+  private ArrayList<Cursor> cursors;
 
   private int selection;
   private int PLAY_GAME = 0;
@@ -12,15 +14,35 @@ public class MainMenu {
   public MainMenu() {
     this.background = loadImage("mainmenubackground.png");
     this.foreground = loadImage("mainmenuforeground.png");
-    
+    this.ready = loadImage("xboxready.png");
+    this.notReady = loadImage("xboxnotready.png");
+
     this.offset = 0;
-    
+
     this.selection = PLAY_GAME;
+
+    this.cursors = new ArrayList<Cursor>();
+
+    if (isPlayer1Ready()) {
+      cursors.add(new Cursor(controller1, 1));
+    }
+    if (isPlayer2Ready()) {
+      cursors.add(new Cursor(controller1, 2));
+    }
+    if (isPlayer3Ready()) {
+      cursors.add(new Cursor(controller3, 3));
+    }
+    if (isPlayer4Ready()) {
+      cursors.add(new Cursor(controller4, 4));
+    }
   }
 
   public void update() {
     updateSelector();
     updateOffset();
+    for (Cursor cursor : cursors) {
+      cursor.update();
+    }
   }
 
   public void draw() {
@@ -31,18 +53,23 @@ public class MainMenu {
     drawVerticalLines();
 
     drawSelector();
-    drawPlayerCircles();
+    drawReadyStatuses();
+
+    for (Cursor cursor : cursors) {
+      cursor.draw();
+    }
 
     image(foreground, 0, 0);
   }
 
   public void updateSelector() {
-    if (keys[ENTER]) {
-      if (selection == PLAY_GAME) {
-        game = new Game(isPlayer1Ready(), isPlayer2Ready(), isPlayer3Ready(), isPlayer4Ready());
-        state = GAME_STATE;
-      } else {
-        exit();
+    for (Cursor cursor : cursors) {
+      if (cursor.x > 500 && cursor.x < 750) {
+        if (cursor.y > 350 && cursor.y < 400) {
+          selection = 0;
+        } else if (cursor.y >= 425 && cursor.y < 500) {
+          selection = 1;
+        }
       }
     }
     if (keys[UP] || keys['W']) {
@@ -55,6 +82,14 @@ public class MainMenu {
       selection = 0;
     } else if (selection > 1) {
       selection = 1;
+    }
+    if (keys[ENTER] || controller1.A.pressed()) {
+      if (selection == PLAY_GAME) {
+        game = new Game(isPlayer1Ready(), isPlayer2Ready(), isPlayer3Ready(), isPlayer4Ready());
+        state = GAME_STATE;
+      } else {
+        exit();
+      }
     }
   }
 
@@ -71,7 +106,7 @@ public class MainMenu {
       line(x, 0, x, height);
     }
   }
-  
+
   private void drawSelector() {
     rectMode(CENTER);
     stroke(0, 0, 0, 50);
@@ -83,23 +118,15 @@ public class MainMenu {
     offset = (offset + 1) % SQUARE_SIDE;
   }
 
-  private void drawPlayerCircles() {
-    drawCircle(1, isPlayer1Ready());
-    drawCircle(2, isPlayer2Ready());
-    drawCircle(3, isPlayer3Ready());
-    drawCircle(4, isPlayer4Ready());
+  private void drawReadyStatuses() {
+    drawReadyStatus(1, isPlayer1Ready());
+    drawReadyStatus(2, isPlayer2Ready());
+    drawReadyStatus(3, isPlayer3Ready());
+    drawReadyStatus(4, isPlayer4Ready());
   }
 
-  private void drawCircle(int player, boolean ready) {
-    if (ready) {
-      fill(0, 200, 0, 100);
-      stroke(0, 200, 0, 255);
-    } else {
-      fill(255, 0, 0, 100);
-      stroke(255, 0, 0, 255);
-    }
-    
-    ellipse((player - 1) * 340 + 125, 600, 75, 75);
+  private void drawReadyStatus(int player, boolean playerReady) {
+    image(playerReady ? ready : notReady, (player - 1) * 340 + 70, 550);
   }
 
   private boolean isPlayer1Ready() {
@@ -107,7 +134,7 @@ public class MainMenu {
   }
 
   private boolean isPlayer2Ready() {
-    return true;
+    return false;
   }
 
   private boolean isPlayer3Ready() {

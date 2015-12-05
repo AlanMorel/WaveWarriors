@@ -16,5 +16,16 @@ public abstract class Entity {
   public boolean isDead() {
     return hp <= 0;
   }
+
+  public void setHPBarColor() {
+    float percent = hp * 100 / maxHp;
+    if (percent < 30) {
+      fill(255, 102, 102);
+    } else if (percent < 60) {
+      fill(241, 196, 15);
+    } else {
+      fill(77, 255, 136);
+    }
+  }
 }
 

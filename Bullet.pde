@@ -1,6 +1,5 @@
 public class Bullet {
 
-  // Determined (i.e., set) only when fired
   private float direction;  
   private float speed;
   private float x;
@@ -13,11 +12,15 @@ public class Bullet {
   public static final float BULLET_RADIUS = 8;
   public static final float BULLET_SPEED = 5;
 
-
   public Bullet(final float red, final float green, final float blue) {
     this.red = red;
     this.green = green;
     this.blue = blue;
+  }
+
+  public void display(Player owner) {
+    fill(255, 0, 0);
+    display();
   }
 
   public void display() {
@@ -27,19 +30,30 @@ public class Bullet {
     ellipse(x, y, BULLET_RADIUS, BULLET_RADIUS);
   }
 
+  public void update(Player owner) {
+    update();
+    if (owner.hasBulletSpeed()) {
+      update();
+    }
+  }
+
   public void update() {
     x -= speed*cos(direction);
     y -= speed*sin(direction);
   }
-  
+
   public void setVelocity(final float speed, final float direction) {
     this.speed = speed; 
-    this.direction = direction;
+    this.direction = (direction + 180) / 57; //idk man math is strange
   }
-  
+
   public void setPosition(final float x, final float y) {
     this.x = x;
-    this.y = y; 
+    this.y = y;
+  }
+  
+  public boolean isOutOfBounds(){
+    return x < -BULLET_RADIUS * 2 || x > width || y > height || y < -BULLET_RADIUS * 2;
   }
 }
 

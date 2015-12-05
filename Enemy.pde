@@ -21,16 +21,16 @@ public class Enemy extends Entity {
   private float shootingMarginOfError;
 
   public static final float BASE_BULLET_SPEED = 2;
-  public static final float BULLET_SPEED_FACTOR = 0.2;
+  public static final float BULLET_SPEED_FACTOR = 0.1;
 
-  public static final int BASE_HEALTH = 4;
-  public static final int HEALTH_FACTOR = 1;
+  public static final int BASE_HEALTH = 100;
+  public static final int HEALTH_FACTOR = 10;
 
   public static final int ENEMY_RADIUS = 50;
-  public static final float MAX_COLOR_VALUE = 90;
+  public static final float MAX_COLOR_VALUE = 100;
 
-  public static final float WAVE_SPEED_FACTOR = 0.15;
-  public static final float SPEED_TO_REACH_SCREEN = 0.8;
+  public static final float WAVE_SPEED_FACTOR = 0.1;
+  public static final float SPEED_TO_REACH_SCREEN = 1;
   public static final float MINIMUM_SPEED = 0.1;
   public static final float MAXIMUM_SPEED = 1.1;
 
@@ -55,8 +55,6 @@ public class Enemy extends Entity {
     setNewTargetPosition();
   }
   
-  
-  
   // Display Methods
   public void display() {
     fill(rFillColor, gFillColor, bFillColor);
@@ -79,16 +77,14 @@ public class Enemy extends Entity {
     strokeWeight(1.5);
     rectMode(CORNER);
 
-    fill(255, 102, 102);
+    fill(0, 0, 0);
     final float barWidth = radius*2;
     rect(hpBarX - barWidth/2, hpBarY, barWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
 
-    fill(77, 255, 136);
+    setHPBarColor();
     final float remainingHealthWidth = radius*hp/maxHp * 2;
     rect(hpBarX - barWidth/2, hpBarY, remainingHealthWidth, HP_BAR_HEIGHT, HP_BAR_ROUNDED_CORNER_RADIUS);
   }
-
-
 
   // Update Methods
   public void update() {
@@ -101,32 +97,21 @@ public class Enemy extends Entity {
   }
 
   public void updateShootingStatus() {
-    if ((--fireDelay == 0)) {
-      fireAtNearestAlivePlayer();
+    if (--fireDelay == 0) {
+      fireAtPlayer(getNearestAlivePlayer());
       updateFireDelay();
     }
   }
 
 
 
-  // Shooting Methods
-  public void fireAtNearestAlivePlayer() {
-    final Player nearestPlayer = getNearestAlivePlayer();
-    if (nearestPlayer == null) {
-      println("Cannot fire at nearest player - no players left."); 
+  public void fireAtPlayer(Player player) {
+    if (player == null) {
+      println("Cannot fire at nearest player - no players detected."); 
       return;
     }
-    fireAtPlayer(nearestPlayer);
-  }
-
-  public void fireAtPlayer(final Player player) {
-    final float targetX = player.x + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
-    final float targetY = player.y + random(-player.radius - shootingMarginOfError, player.radius + shootingMarginOfError);
-
-    final float deltaX = x - targetX;
-    final float deltaY = y - targetY;
-    final float direction = atan2(deltaY, deltaX);
-
+    
+    float direction = (float) (Math.atan2(player.y - y, player.x - x) * 180.0 / Math.PI);
     final Bullet bullet = new Bullet(rFillColor, gFillColor, bFillColor);
     bullet.setPosition(x, y);
     bullet.setVelocity(bulletSpeed, direction);
@@ -137,12 +122,18 @@ public class Enemy extends Entity {
     return firedBullets; 
   }
   
-  public void hit() {
-    hp -= 1;
+  public void hitByBullet() {
+    hp -= 25;
   }
   
-
-
+  public void hitByLaser() {
+    hp -= 5;
+  }
+  
+  public void hitByNuke() {
+    hp -= maxHp / 2;
+  }
+  
   // Movement methods
   public void advanceToNearestAlivePlayer() {
     if (frameNumber++ >= framesBeforeUpdatingTarget) {
@@ -150,10 +141,12 @@ public class Enemy extends Entity {
     }
 
     Player nearestPlayer = getNearestAlivePlayer();
+
     if (nearestPlayer == null) {
-      println("Cannot fire at nearest player - no players left."); 
+      println("Cannot fire at nearest player - no players detected."); 
       return;
     }
+    
     float deltaY = y - (nearestPlayer.y + yTargetOffset);
     float deltaX = x - (nearestPlayer.x + xTargetOffset);
     float direction  = atan2(deltaY, deltaX);
@@ -182,14 +175,14 @@ public class Enemy extends Entity {
   private Player getNearestAlivePlayer() {
     Player closestPlayer = null;
     float minDistance = Integer.MAX_VALUE;
-    for (final Player p : game.players) {
-      if ((p == null) || (p.down)) {
+    for (Player player : game.players) {
+      if (player == null || player.down) {
         continue;
       }
-      final float distanceFromPlayer = dist(x, y, p.x, p.y);
+      final float distanceFromPlayer = dist(x, y, player.x, player.y);
       if (distanceFromPlayer < minDistance) {
         minDistance = distanceFromPlayer;
-        closestPlayer = p;
+        closestPlayer = player;
       }
     }
     return closestPlayer;
@@ -202,8 +195,6 @@ public class Enemy extends Entity {
     this.yTargetOffset = (int)random(-200, 200);
   }
 
-  
-  
   // Calculation Methods
   public float getBulletSpeedForWave(final int waveNum) {
     return BASE_BULLET_SPEED + (BULLET_SPEED_FACTOR * waveNum);
@@ -218,8 +209,6 @@ public class Enemy extends Entity {
   public float getEnemySpeedForWave(final int waveNum) {
     return random(MINIMUM_SPEED, MAXIMUM_SPEED) + (waveNum * WAVE_SPEED_FACTOR);
   }
-  
-  
   
   // Helper Methods
   private boolean isOnScreen() {

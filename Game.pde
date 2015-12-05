@@ -19,27 +19,29 @@ public class Game {
   public static final int BASE_FONT_SIZE = 100;
   public static final int INTRO_FRAME_LENGTH = 150;
 
-  public static final int POWER_UP_SPAWN_DELAY = 1000;
+  public static final int POWER_UP_SPAWN_DELAY = 500;
+
   private int lastPowerUpSpawn;
 
   public Game(boolean player1, boolean player2, boolean player3, boolean player4) {
     this.background = loadImage("gamebackground.png");
+
     this.players = new ArrayList<Player>();
 
     if (player1) {
-      players.add(new Player(1, 100, 100, false));
+      players.add(new Player(1, 100, 100, controller1, false));
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, false));
+      players.add(new Player(2, 1100, 100, controller1, true));
     }
 
     if (player3) {
-      players.add(new Player(3, 100, 500, false));
+      players.add(new Player(3, 100, 500, controller3, false));
     }
 
     if (player4) {
-      players.add(new Player(4, 1100, 500, false));
+      players.add(new Player(4, 1100, 500, controller4, false));
     }
 
     this.paused = false;
@@ -57,7 +59,7 @@ public class Game {
   }
 
   public void update() {
-    if (keys[BACKSPACE]) {
+    if (keys[BACKSPACE] || controller1.start.pressed()) {
       paused = !paused;
       keys[BACKSPACE] = false;
     }
@@ -76,7 +78,7 @@ public class Game {
     checkCollisions();
 
     if (!isIntroducingWave) {
-      updateWave();  // Don' allow wave to advance while introductory text is on screen
+      updateWave();
     }
 
     checkPowerUpSpawn();
@@ -112,9 +114,9 @@ public class Game {
 
   public void draw() {
     image(background, 0, 0);
-
-    drawPlayers();
+    
     drawPowerUps();
+    drawPlayers();
 
     if (isIntroducingWave) {
       introduceWave(waveLevel);
@@ -123,12 +125,13 @@ public class Game {
     if (paused) {
       drawPauseMenu();
     }
+    
     wave.display();
   }
 
   void mouseClicked() {
-    for (final Player p : players) {
-      p.shoot();
+    for (Player player : players) {
+      player.shoot();
     }
   }
 
@@ -147,18 +150,64 @@ public class Game {
     checkPlayerBulletCollisions();
     checkEnemyBulletCollisions();
     checkPlayerPowerUpCollisions();
+    checkPlayerLaserCollisions();
+  }
+
+  public void checkPlayerLaserCollisions() {
+    for (Player player : players) {
+      if (player.usingGun() || player.down || !player.isFiring()) {
+        continue;
+      }
+      Enemy target = null;
+      float targetDistance = Integer.MAX_VALUE;
+
+      float x0 = player.x + (float) (player.radius * Math.sin(Math.toRadians(90 - player.aim)));
+      float y0 = player.y + (float) (player.radius * Math.sin(Math.toRadians(player.aim)));
+      float x1 = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
+      float y1 = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
+      
+      for (Enemy enemy : wave.enemies) {
+        if (collided(x0, y0, x1, y1, enemy.x, enemy.y, enemy.radius)) {
+          float dist = dist(player.x, player.y, enemy.x, enemy.y);
+          if (dist < targetDistance) {
+            targetDistance = dist;
+            target = enemy;
+          }
+        }
+      }
+      
+      if (target != null) {
+        if (frameCount - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
+          player.lastLaser = frameCount;
+          target.hitByLaser();
+          if (player.hasDamage()) {
+            target.hitByLaser();
+          }
+        }
+        player.laserX = player.x + (float) (targetDistance * Math.sin(Math.toRadians(90 - player.aim)));
+        player.laserY = player.y + (float) (targetDistance * Math.sin(Math.toRadians(player.aim)));
+      } else {
+        player.laserX = player.x + (float) (width * Math.sin(Math.toRadians(90 - player.aim)));
+        player.laserY = player.y + (float) (width * Math.sin(Math.toRadians(player.aim)));
+      }
+    }
   }
 
   public void checkPlayerBulletCollisions() {
     ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
     for (Player player : players) {
       for (Bullet bullet : player.bullets) {
+        if (bullet.isOutOfBounds()) {
+          toRemove.add(bullet);
+          continue;
+        }
         for (Enemy enemy : wave.enemies) {
-          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS)) {
+          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS / 2)) {
             toRemove.add(bullet);
-            enemy.hit();
-            if (player.powerUp != null && player.powerUp.isDamage()) {
-              enemy.hit();
+            bulletSound.trigger();
+            enemy.hitByBullet();
+            if (player.hasDamage()) {
+              enemy.hitByBullet();
             }
           }
         }
@@ -173,7 +222,14 @@ public class Game {
     for (Enemy enemy : wave.enemies) {
       ArrayList<Bullet> toRemove = new ArrayList<Bullet>();
       for (Bullet bullet : enemy.getFiredBullets ()) {
+        if (bullet.isOutOfBounds()) {
+          toRemove.add(bullet);
+          continue;
+        }
         for (Player player : players) {
+          if (player.hasInvincibility()) {
+            continue;
+          }
           if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, player.x, player.y, player.radius)) {
             toRemove.add(bullet);
             player.hit();
@@ -191,8 +247,17 @@ public class Game {
     for (PowerUp powerUp : powerUps) {
       for (Player player : players) {
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
-          player.powerUp = powerUp;
-          player.pickUpTime = frameCount;
+          if (powerUp.type == PowerUp.HEAL) {
+            player.heal();
+          } else if (powerUp.type == PowerUp.NUKE) {
+            for (Enemy enemy : wave.enemies) {
+              enemy.hitByNuke();
+            }
+          } else {
+            player.powerUp = powerUp;
+            player.pickUpTime = frameCount;
+          }
+          powerUpSound.trigger();
           toRemove.add(powerUp);
         }
       }
@@ -206,19 +271,39 @@ public class Game {
     return dist(x1, y1, x2, y2) < r1 + r2;
   }
 
+  public boolean collided(float x0, float y0, float x1, float y1, float x2, float y2, float r) {
+    float a = x1-x0; 
+    float b = y1-y0;
+    float c = x2-x0;
+    float d = y2-y0;
+
+    if ((d*a - c*b)*(d*a - c*b) <= r*r*(a*a + b*b)) {
+      if (c*c + d*d <= r*r) {
+        return true;
+      }
+      if ((a-c)*(a-c) + (b-d)*(b-d) <= r*r) {
+        return true;
+      }
+      if (c*a + d*b >= 0 && c*a + d*b <= a*a + b*b) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public float playerDist(Player p1, Player p2) {
     return dist(p1.x, p1.y, p2.x, p2.y);
   }
 
   private void healAllPlayers() {
-    for (final Player p : players) {
-      p.respawn();
+    for (Player player : players) {
+      player.respawn();
     }
   }
 
   private void drawPlayers() {
-    for (final Player p : players) {
-      p.display();
+    for (Player player : players) {
+      player.display();
     }
   }
 
@@ -233,17 +318,17 @@ public class Game {
     fill(0, 255 - abs(INTRO_FRAME_LENGTH / 2 - introFrame) * 4);
     rectMode(CENTER);
     rect(width/2, height/2, width, height/2);
-    
+
     textAlign(CENTER);
     textFont(waveFont, BASE_FONT_SIZE + 25);
     fill(255);
-    
+
     if ((waveTextX < width/3.5) || (waveTextX > width*2/3.5)) {
-      waveTextX += 30; 
+      waveTextX += 30;
     } else {
       waveTextX += 3;
     }
-    
+
     text("Wave", waveTextX, height/2 - 50);
     text("#" + waveLevel, width - waveTextX, height/2 + 125);
   }
@@ -255,13 +340,13 @@ public class Game {
   }
 
   private boolean shouldSpawnPowerUp() {
-    return frameCount - lastPowerUpSpawn >= POWER_UP_SPAWN_DELAY;
+    return frameCount - lastPowerUpSpawn >= POWER_UP_SPAWN_DELAY && powerUps.size() < 3;
   }
 
   private PowerUp getRandomPowerUp() {
     float x = random(width - 100) + 50;
     float y = random(height - 100) + 50;
-    int type = int(random(3));
+    int type = int(random(7));
     return new PowerUp(x, y, type);
   }
 
