@@ -11,7 +11,7 @@ AudioPlayer backgroundMusic;
 public ControlIO control;
 public Controller controller1, controller2, controller3, controller4;
 
-public boolean mac = false;
+public boolean mac = true;
 
 public int state;
 
