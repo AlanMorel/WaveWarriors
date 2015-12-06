@@ -118,6 +118,7 @@ public class PowerUp {
     popMatrix();
     fill(red, green, blue);
     ellipse(x, y, POWER_UP_RADIUS, POWER_UP_RADIUS);
+    imageMode(CORNER);
     image(icon, x - 16, y - 16);
   }
 }

@@ -103,6 +103,8 @@ public class Enemy extends Entity {
     }
   }
 
+
+
   public void fireAtPlayer(Player player) {
     if (player == null) {
       println("Cannot fire at nearest player - no players detected."); 
@@ -139,7 +141,7 @@ public class Enemy extends Entity {
     }
 
     Player nearestPlayer = getNearestAlivePlayer();
-    
+
     if (nearestPlayer == null) {
       println("Cannot fire at nearest player - no players detected."); 
       return;

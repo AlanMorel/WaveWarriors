@@ -46,6 +46,7 @@ public class MainMenu {
   }
 
   public void draw() {
+    imageMode(CORNER);
     image(background, 0, 0);
 
     stroke(150, 150, 150, 50);

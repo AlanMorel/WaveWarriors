@@ -11,7 +11,7 @@ AudioPlayer backgroundMusic;
 public ControlIO control;
 public Controller controller1, controller2, controller3, controller4;
 
-public boolean mac = false;
+public boolean mac = true;
 
 public int state;
 
@@ -42,6 +42,11 @@ void setup() {
 }
 
 void draw() {
+  if (state == GAME_STATE && game.playerSelectedMainMenu) {
+    mainMenu = new MainMenu();
+    state = MAIN_MENU_STATE; 
+  }
+  
   if (state == MAIN_MENU_STATE) {
     mainMenu.update();
     mainMenu.draw();
