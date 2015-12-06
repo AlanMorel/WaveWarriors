@@ -12,11 +12,19 @@ public class Game {
   private int waveLevelFontTransparency;
   private int waveTextX;
   private int introFrame;
+  private int gameOverTextX;
+  private int scoreTextWidth;
+  private int backButtonX;
+  
+  public  boolean playerSelectedMainMenu;
+  
+  private PImage backArrow;
+  private PImage backButton;
 
   PFont waveFont;
 
   public static final int FIRST_WAVE_LEVEL = 1;
-  public static final int BASE_FONT_SIZE = 100;
+  public static final int BASE_FONT_SIZE = 125;
   public static final int INTRO_FRAME_LENGTH = 150;
 
   public static final int POWER_UP_SPAWN_DELAY = 500;
@@ -36,7 +44,7 @@ public class Game {
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, controller1, true));
+      players.add(new Player(2, 1100, 100, controller1, false));
     }
 
     if (player3) {
@@ -46,7 +54,7 @@ public class Game {
     if (player4) {
       players.add(new Player(4, 1100, 500, controller4, false));
     }
-
+    
     this.paused = false;
     this.waveLevel = FIRST_WAVE_LEVEL;
     this.wave = new Wave(waveLevel);
@@ -56,6 +64,12 @@ public class Game {
     this.introFrame = 0;
     this.lastPause = 0;
     this.pausedFrames = 0;
+    this.gameOverTextX = -2000;
+    this.scoreTextWidth = 0;
+    this.backButtonX = -500;
+    this.backArrow = loadImage("backArrow.png");
+    this.backButton = loadImage("backButton.png");
+    this.playerSelectedMainMenu = false;;
 
     this.isIntroducingWave = true;
 
@@ -101,8 +115,14 @@ public class Game {
     updateIntroductionStatus();
     checkCollisions();
 
-    if (!isIntroducingWave) {
+    if (!isIntroducingWave && !gameLost()) {
       updateWave();
+    } else if (gameLost()) {
+      for (Player player : players) {
+        if (player.controller.justPressed(player.controller.B)) {
+          playerSelectedMainMenu = true;
+        }
+      }
     }
 
     checkPowerUpSpawn();
@@ -137,6 +157,7 @@ public class Game {
   } 
 
   public void draw() {
+    imageMode(CORNER);
     image(background, 0, 0);
 
     drawPowerUps();
@@ -150,6 +171,10 @@ public class Game {
     
     if (paused) {
       drawPauseMenu();
+    }
+    
+    if (gameLost()) {
+      drawGameOverScreen(); 
     }
   }
 
@@ -344,7 +369,7 @@ public class Game {
     rect(width/2, height/2, width, height/2);
 
     textAlign(CENTER);
-    textFont(waveFont, BASE_FONT_SIZE + 25);
+    textFont(waveFont, BASE_FONT_SIZE);
     fill(255);
 
     if ((waveTextX < width/3.5) || (waveTextX > width*2/3.5)) {
@@ -378,6 +403,67 @@ public class Game {
     PowerUp powerUp = getRandomPowerUp();
     powerUps.add(powerUp);
     lastPowerUpSpawn = game.frameCount();
+  }
+  
+  private boolean gameLost() {
+    for (Player player : players) {
+      if (!player.down) {
+        return false; 
+      }
+    }
+    return true;
+  }
+  
+  private void drawGameOverScreen() {
+    noStroke();
+    rectMode(CENTER);
+    float transparency = map(gameOverTextX, -500, 850, 255, 100);
+    fill(30, transparency);
+    rect(width/2, height/2, width, height);
+
+    textAlign(CENTER);
+    textFont(waveFont, BASE_FONT_SIZE + 25);
+    fill(255, 235);
+
+    gameOverTextX = constrain(gameOverTextX + 50, -500, 850);
+
+    text("Over", gameOverTextX, 150);
+    text("Game", width - gameOverTextX, 150);
+    
+    boolean shouldShowScoreBanner = gameOverTextX == 850;
+    if (shouldShowScoreBanner) {
+       fill(255, 150);
+       scoreTextWidth = constrain(scoreTextWidth + 100, 0, width);
+       rectMode(CENTER);
+       rect(width/2, height/2, scoreTextWidth, height/2);
+    }
+    
+    boolean shouldShowScoreAndBackButton = scoreTextWidth == width;
+    if (shouldShowScoreAndBackButton) {
+       fill(255, 235);
+       textFont(waveFont, 90);
+       text("Score", width * 3/4, height/2 - 50);
+       
+       fill(255, 102, 102, 200);
+       textFont(waveFont, 150);
+       text(waveLevel, width * 3/4, height/2 + 100);
+       
+       backButtonX = constrain(backButtonX + 50, -500, width/4);
+       stroke(0);
+       strokeWeight(0.5);
+       rectMode(CENTER);
+       rect(backButtonX, height/2, 400, 200, 50);
+       textFont(waveFont, 50);
+       fill(0, 175);
+       text("Main Menu", backButtonX, height/2 - 20);
+       imageMode(CENTER);
+       image(backArrow, backButtonX - 50, height/2 + backArrow.height/2 - 10);
+       
+       fill(0);
+       textFont(waveFont, 25);
+       text("Press", backButtonX + 55, height/2 + backArrow.height/2 - 20);
+       image(backButton, backButtonX + 55, height/2 + backArrow.height/2 + backButton.height/2 - 10);
+    }
   }
 }
 
