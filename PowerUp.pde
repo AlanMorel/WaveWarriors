@@ -7,6 +7,7 @@ public class PowerUp {
   public static final float INVINCIBILITY = 4;
   public static final float HEAL = 5;
   public static final float NUKE = 6;
+  public static final float AIM_BOT = 7;
     
   public static final float POWER_UP_RADIUS = 75;
   private static final int DURATION = 500;
@@ -60,7 +61,12 @@ public class PowerUp {
       red = 0;
       green = 0;
       blue = 0;
+    } else if (type == AIM_BOT) {
+      red = 219;
+      green = 10;
+      blue = 91;
     }
+    
   }
 
   public void setPowerUpName() {
@@ -74,6 +80,8 @@ public class PowerUp {
       name = "2x Bullet Speed";
     } else if (type == INVINCIBILITY) {
       name = "Invincibility";
+    } else if (type == AIM_BOT) {
+      name = "Aim Bot";
     }
   }
 
@@ -92,6 +100,8 @@ public class PowerUp {
       icon = loadImage("heal.png");
     } else if (type == NUKE) {
       icon = loadImage("nuke.png");
+    } else if (type == AIM_BOT) {
+      icon = loadImage("aimbot.png");
     }
   }
 
@@ -102,8 +112,8 @@ public class PowerUp {
     pushMatrix();
     translate(x, y);
     rotate(game.frameCount() / (float) 10);
-    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 5) * 50, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 10) *  50);
-    ellipse(0, 0, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 10) * 50, POWER_UP_RADIUS + (float) Math.sin((float) game.frameCount() / 5) *  50);
+    ellipse(0, 0, POWER_UP_RADIUS * 1.8 + (float) Math.sin((float) game.frameCount() / 5) * 50, POWER_UP_RADIUS  + (float) Math.sin((float) game.frameCount() / 10) *  50);
+    ellipse(0, 0, POWER_UP_RADIUS  + (float) Math.sin((float) game.frameCount() / 10) * 50, POWER_UP_RADIUS * 1.8 + (float) Math.sin((float) game.frameCount() / 5) *  50);
     rotate(0);
     popMatrix();
     fill(red, green, blue);

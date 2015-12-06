@@ -5,7 +5,7 @@ import ddf.minim.*;
 import java.util.Map;
 
 Minim minim;
-AudioSample bulletSound, powerUpSound;
+AudioSample bulletSound, powerUpSound, ultimateSound;
 AudioPlayer backgroundMusic;
  
 public ControlIO control;
@@ -29,6 +29,7 @@ void setup() {
   minim = new Minim(this);
   bulletSound = minim.loadSample("bullet.mp3", 512);
   powerUpSound = minim.loadSample("powerup.mp3", 512);
+  ultimateSound = minim.loadSample("ultimate.mp3", 512);
   
   backgroundMusic = minim.loadFile("music.wav", 2048);
   backgroundMusic.loop();
