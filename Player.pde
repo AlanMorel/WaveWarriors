@@ -4,7 +4,8 @@ public class Player extends Entity {
   private static final int LASER = 1;
 
   private static final int REVIVE_TIME = 100;
-  private static final int ULTIMATE_DURATION = 500;
+  private static final int ULTIMATE_DURATION = 250;
+  private static final int MAX_ENERGY = 150;
 
   public static final int BULLET_RATE = 10;
   public static final int LASER_RATE = 1;
@@ -184,14 +185,14 @@ public class Player extends Entity {
   }
 
   public void checkUltimate() {
-    if (controller.X.pressed() && controller.Y.pressed() && energy >= 100) {
+    if (controller.X.pressed() && controller.Y.pressed() && energy >= MAX_ENERGY && ultimateTime == 0) {
       ultimateTime = game.frameCount();
       ultimateSound.trigger();
     }
   }
 
   public boolean isInUltimate() {
-    return ultimateTime > 0 && game.frameCount() - ultimateTime < ULTIMATE_DURATION;
+    return ultimateTime > 0 && game.frameCount() - ultimateTime < ULTIMATE_DURATION && energy > 0;
   }
 
   public void movePlayer() {
@@ -275,9 +276,9 @@ public class Player extends Entity {
     bullet.setVelocity(Bullet.BULLET_SPEED, aim);
     bullets.add(bullet);
 
-    energy = 100 - (game.frameCount() - ultimateTime) * 100 / ULTIMATE_DURATION;
+    energy = MAX_ENERGY - (game.frameCount() - ultimateTime) * MAX_ENERGY / ULTIMATE_DURATION;
 
-    if (energy <= 0) {
+    if (energy <= 1) {
       energy = 0;
       ultimateTime = 0;
     }
@@ -397,7 +398,7 @@ public class Player extends Entity {
 
     textSize(18);
 
-    if (energy < 100) {
+    if (energy < MAX_ENERGY) {
       fill(0);
       text("Player " + id, hpBarX, height - 60);
     } else {
@@ -422,12 +423,12 @@ public class Player extends Entity {
 
   public void drawEnergyBar() {
     int energyBarX = id * 325 - 175;
-    if (energy > 100) {
+    if (energy > MAX_ENERGY) {
       fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5);
       rect(energyBarX - 75, height - 25, 150, 15, 3);
     } else {
       fill(141 + energy, 96 + energy, -85 + energy);
-      rect(energyBarX - 75, height - 25, 150 * energy / 100, 15, 3);
+      rect(energyBarX - 75, height - 25, energy, 15, 3);
     }
   }
 
@@ -440,7 +441,7 @@ public class Player extends Entity {
 
     textSize(18);
     fill(0);
-    text(powerUp.name + " active", textX, height - 110);
+    text(powerUp.name, textX, height - 110);
 
     int powerUpBar = id * 325 - 175;
     rectMode(CORNER);

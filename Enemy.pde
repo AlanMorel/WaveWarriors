@@ -29,10 +29,10 @@ public class Enemy extends Entity {
   public static final int ENEMY_RADIUS = 50;
   public static final float MAX_COLOR_VALUE = 100;
 
-  public static final float WAVE_SPEED_FACTOR = 0.1;
+  public static final float WAVE_SPEED_FACTOR = 0.05;
   public static final float SPEED_TO_REACH_SCREEN = 1;
   public static final float MINIMUM_SPEED = 0.1;
-  public static final float MAXIMUM_SPEED = 1.1;
+  public static final float MAXIMUM_SPEED = 1.0;
 
   public static final float HP_BAR_HEIGHT = 10.0;
   public static final float HP_BAR_DISTANCE_ABOVE_ENEMY = 7.0;
@@ -93,7 +93,7 @@ public class Enemy extends Entity {
   }
 
   public void updateFireDelay() {
-    fireDelay = (int)random(100, 300);
+    fireDelay = (int)random(100, 500);
   }
 
   public void updateShootingStatus() {
