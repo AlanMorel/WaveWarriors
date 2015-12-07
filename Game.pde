@@ -184,6 +184,7 @@ public class Game {
       drawGameOverScreen(); 
     }
     
+    displayWave();
     displayTime();
   }
 
@@ -481,12 +482,19 @@ public class Game {
     }
   }
   
+  private void displayWave() {
+    fill(0);
+    textAlign(CORNER);
+    textFont(waveFont, 30);
+    text("Wave " + waveLevel, 30, 30);
+  }
+  
   private void displayTime() {
     String time = getFormattedTimeElapsed();
-    fill(0, 0, 0);
+    fill(0);
     textAlign(CORNER);
     textFont(timeFont, 30);
-    text(time, 30, 30);
+    text(time, 30, 60);
   }
   
   private String getFormattedTimeElapsed() {
