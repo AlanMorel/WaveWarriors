@@ -15,12 +15,15 @@ public class Game {
   private int gameOverTextX;
   private int scoreTextWidth;
   private int backButtonX;
+  private long startTime;
+  private long timeOfLosing;
   
   public  boolean playerSelectedMainMenu;
   
   private PImage backArrow;
   private PImage backButton;
 
+  PFont timeFont;
   PFont waveFont;
 
   public static final int FIRST_WAVE_LEVEL = 1;
@@ -28,6 +31,8 @@ public class Game {
   public static final int INTRO_FRAME_LENGTH = 150;
 
   public static final int POWER_UP_SPAWN_DELAY = 1000;
+  
+  public static final int UNINITIALIZED = -1;
 
   private int lastPowerUpSpawn;
 
@@ -75,6 +80,9 @@ public class Game {
 
     this.powerUps = new ArrayList<PowerUp>();
     this.lastPowerUpSpawn = 0;
+    this.startTime = System.currentTimeMillis();
+    this.timeFont = loadFont("CourierNewPS-BoldMT-30.vlw");
+    this.timeOfLosing = UNINITIALIZED;
   }
 
   public int frameCount() {
@@ -117,6 +125,7 @@ public class Game {
 
     if (!isIntroducingWave && !gameLost()) {
       updateWave();
+      checkPowerUpSpawn();
     } else if (gameLost()) {
       for (Player player : players) {
         if (player.controller.justPressed(player.controller.B)) {
@@ -124,8 +133,6 @@ public class Game {
         }
       }
     }
-
-    checkPowerUpSpawn();
   }
 
   private void updateWave() {
@@ -176,6 +183,8 @@ public class Game {
     if (gameLost()) {
       drawGameOverScreen(); 
     }
+    
+    displayTime();
   }
 
   void mouseClicked() {
@@ -403,6 +412,9 @@ public class Game {
         return false; 
       }
     }
+    if (timeOfLosing == UNINITIALIZED) {
+      timeOfLosing = System.currentTimeMillis();
+    }  
     return true;
   }
   
@@ -417,7 +429,7 @@ public class Game {
     textFont(waveFont, BASE_FONT_SIZE + 25);
     fill(255, 235);
 
-    gameOverTextX = constrain(gameOverTextX + 50, -500, 850);
+    gameOverTextX = constrain(gameOverTextX + 60, -500, 850);
 
     text("Over", gameOverTextX, 150);
     text("Game", width - gameOverTextX, 150);
@@ -437,7 +449,7 @@ public class Game {
        text("Score", width * 3/4, height/2 - 50);
        
        fill(255, 102, 102, 200);
-       textFont(waveFont, 150);
+       textFont(waveFont, map(sin(frameCount/8.0), -1, 1, 150, 175));
        text(waveLevel, width * 3/4, height/2 + 100);
        
        backButtonX = constrain(backButtonX + 50, -500, width/4);
@@ -448,14 +460,42 @@ public class Game {
        textFont(waveFont, 50);
        fill(0, 175);
        text("Main Menu", backButtonX, height/2 - 20);
-       imageMode(CENTER);
-       image(backArrow, backButtonX - 50, height/2 + backArrow.height/2 - 10);
-       
-       fill(0);
+              
+       fill(255);
        textFont(waveFont, 25);
-       text("Press", backButtonX + 55, height/2 + backArrow.height/2 - 20);
-       image(backButton, backButtonX + 55, height/2 + backArrow.height/2 + backButton.height/2 - 10);
+       text("Press", backButtonX - 70, height/2 + 45);
+       
+       noFill();
+       strokeWeight(4);
+       ellipseMode(CENTER);
+       textFont(timeFont, 50);
+       
+       stroke(255);
+       ellipse(backButtonX + 50, height/2 + 40, 100, 100);
+       text("B", backButtonX + 50, height/2 + 55);
+       
+       stroke(255, 80, 80, map(sin(frameCount/25.0), -1, 1, 0, 255));
+       ellipse(backButtonX + 50, height/2 + 40, 100, 100);
+       fill(255, 80, 80, map(sin(frameCount/25.0), -1, 1, 0, 255));
+       text("B", backButtonX + 50, height/2 + 55);
     }
+  }
+  
+  private void displayTime() {
+    String time = getFormattedTimeElapsed();
+    fill(0, 0, 0);
+    textAlign(CORNER);
+    textFont(timeFont, 30);
+    text(time, 30, 30);
+  }
+  
+  private String getFormattedTimeElapsed() {
+    long currentTime = gameLost() ? timeOfLosing : System.currentTimeMillis();
+    long timeElapsed = currentTime - startTime;
+    int minutes = (int) ((timeElapsed / (1000*60)) % 60);
+    int seconds = (int) (timeElapsed / 1000) % 60;
+    int mills = (int) timeElapsed % 1000;
+    return String.format("%02d:%02d.%03d", minutes, seconds, mills);
   }
 }
 

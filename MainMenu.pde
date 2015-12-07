@@ -95,6 +95,7 @@ public class MainMenu {
   }
 
   private void drawHorizontalLines() {
+    strokeWeight(1);
     for (int i = 0; i < height / SQUARE_SIDE; i++) {
       float y = i * SQUARE_SIDE;
       line(0, y, width, y);
@@ -102,6 +103,7 @@ public class MainMenu {
   }
 
   private void drawVerticalLines() {
+    strokeWeight(1);
     for (int i = 0; i < width / SQUARE_SIDE; i++) {
       float x = i * SQUARE_SIDE + offset;
       line(x, 0, x, height);
@@ -111,6 +113,7 @@ public class MainMenu {
   private void drawSelector() {
     rectMode(CENTER);
     stroke(0, 0, 0, 50);
+    strokeWeight(1);
     fill(0, 25);
     rect(width/2, selection == PLAY_GAME ? 375 : 460, 325, 75, 15);
   }
@@ -135,7 +138,7 @@ public class MainMenu {
   }
 
   private boolean isPlayer2Ready() {
-    return false;
+    return true;
   }
 
   private boolean isPlayer3Ready() {
