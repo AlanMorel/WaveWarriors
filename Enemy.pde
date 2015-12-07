@@ -26,7 +26,7 @@ public class Enemy extends Entity {
   public static final int BASE_HEALTH = 100;
   public static final int HEALTH_FACTOR = 5;
 
-  public static final int ENEMY_RADIUS = 50;
+  public static final int ENEMY_RADIUS = 25;
   public static final float MAX_COLOR_VALUE = 100;
 
   public static final float WAVE_SPEED_FACTOR = 0.05;
@@ -39,7 +39,7 @@ public class Enemy extends Entity {
   public static final float HP_BAR_ROUNDED_CORNER_RADIUS = 3;
 
   public Enemy(final int waveNum, final float x, final float y) {
-    super(x, y, (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR), ENEMY_RADIUS);
+    super(x, y, (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR), ENEMY_RADIUS * 2);
         
     this.speed = getEnemySpeedForWave(waveNum);
     this.shootingMarginOfError = getShootingMarginOfErrorForWave(waveNum);
