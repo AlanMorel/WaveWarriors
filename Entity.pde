@@ -3,7 +3,7 @@ public abstract class Entity {
   protected float x, y;
   protected int maxHp;
   protected int hp;
-  protected int radius;
+  protected float radius;
 
   public Entity(float x, float y, int hp, int diameter) {
     this.x = x;
