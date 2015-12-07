@@ -1,6 +1,6 @@
 public class Enemy extends Entity {
 
-  private float speed;
+  public float speed;
   private int waveNum;
 
   // Each enemy will have its own favored position from which to attack the player (e.g., 50 pixels east and 40 pixels north of the nearest player)
@@ -11,14 +11,14 @@ public class Enemy extends Entity {
   private int framesBeforeUpdatingTarget;
   private int frameNumber;
 
-  private float rFillColor;
-  private float gFillColor;
-  private float bFillColor;
+  public float rFillColor;
+  public float gFillColor;
+  public float bFillColor;
 
-  private ArrayList<Bullet> firedBullets;
-  private int fireDelay;
-  private float bulletSpeed;
-  private float shootingMarginOfError;
+  public ArrayList<Bullet> firedBullets;
+  public int fireDelay;
+  public float bulletSpeed;
+  public float shootingMarginOfError;
 
   public static final float BASE_BULLET_SPEED = 2;
   public static final float BULLET_SPEED_FACTOR = 0.05;
@@ -188,7 +188,7 @@ public class Enemy extends Entity {
     return closestPlayer;
   }
 
-  private void setNewTargetPosition() {
+  public void setNewTargetPosition() {
     this.frameNumber = 0;
     this.framesBeforeUpdatingTarget = (int)random(180, 660); 
     this.xTargetOffset = (int)random(-350, 350);

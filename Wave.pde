@@ -43,8 +43,11 @@ public class Wave {
         yPos = top ? random(-MAXIMUM_DISTANCE_AWAY_FROM_SCREEN, -MINIMUM_DISTANCE_AWAY_FROM_SCREEN) : 
             random(height + MINIMUM_DISTANCE_AWAY_FROM_SCREEN, height + MAXIMUM_DISTANCE_AWAY_FROM_SCREEN);
       }
-
-      enemies.add(new Enemy(waveNum, xPos, yPos));
+      if (id == 0) {
+        enemies.add(new Boss(waveNum, xPos, yPos));
+      } else {
+        enemies.add(new Enemy(waveNum, xPos, yPos));
+      }
     }
   }
 
