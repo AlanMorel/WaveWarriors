@@ -249,7 +249,7 @@ public class Game {
           continue;
         }
         for (Enemy enemy : wave.enemies) {
-          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, Enemy.ENEMY_RADIUS / 2)) {
+          if (collided(bullet.x, bullet.y, Bullet.BULLET_RADIUS / 2, enemy.x, enemy.y, enemy.radius)) {
             toRemove.add(bullet);
             player.gainEnergy();
             bulletSound.trigger();
