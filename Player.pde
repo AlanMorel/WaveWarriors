@@ -470,7 +470,7 @@ public class Player extends Entity {
     fill(0);
     rect(revivalBarX - 75, height - 100, 150, 15, 3);
     fill(255);
-    rect(revivalBarX - 75, height - 100, getReviveDuration() * 150 / REVIVE_TIME, 15, 3);
+    rect(revivalBarX - 75, height - 100, min(getReviveDuration() * 150 / REVIVE_TIME, 150), 15, 3);
   }
 
   private void drawCrosshairs() {

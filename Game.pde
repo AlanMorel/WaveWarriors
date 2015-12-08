@@ -17,7 +17,7 @@ public class Game {
   private int backButtonX;
   private long startTime;
   private long timeOfLosing;
-  
+
   public  boolean playerSelectedMainMenu;
   private PImage backButton;
 
@@ -29,7 +29,7 @@ public class Game {
   public static final int INTRO_FRAME_LENGTH = 150;
 
   public static final int POWER_UP_SPAWN_DELAY = 500;
-  
+
   public static final int UNINITIALIZED = -1;
 
   private int lastPowerUpSpawn;
@@ -57,7 +57,7 @@ public class Game {
     if (player4) {
       players.add(new Player(4, 800, 500, controller4, false));
     }
-    
+
     this.paused = false;
     this.waveLevel = FIRST_WAVE_LEVEL;
     this.wave = new Wave(waveLevel);
@@ -71,8 +71,8 @@ public class Game {
     this.scoreTextWidth = 0;
     this.backButtonX = -500;
     this.backButton = loadImage("backButton.png");
-    this.playerSelectedMainMenu = false;;
-
+    this.playerSelectedMainMenu = false;
+    
     this.isIntroducingWave = true;
 
     this.powerUps = new ArrayList<PowerUp>();
@@ -100,7 +100,7 @@ public class Game {
         pausedFrames += frameCount - lastPause;
         paused = false;
         lastPause = 0;
-      } else {
+      } else if (!gameLost()) {
         lastPause = frameCount;
         paused = true;
       }
@@ -113,7 +113,10 @@ public class Game {
       return;
     }
 
-    updatePlayers();
+    if (!gameLost()){
+      updatePlayers();
+    }
+    
     if (wave.isDefeated()) {
       healAllPlayers();
     }
@@ -168,19 +171,19 @@ public class Game {
     drawPowerUps();
     drawPlayers();
     wave.display();
-    
+
     if (isIntroducingWave) {
       introduceWave(waveLevel);
     }
 
     wave.display();
-    
+
     if (paused) {
       drawPauseMenu();
     }
-    
+
     if (gameLost()) {
-      drawGameOverScreen(); 
+      drawGameOverScreen();
     } else {
       displayWave();
       displayTime();
@@ -198,7 +201,7 @@ public class Game {
     noStroke();
     fill(0, 200);
     rect(0, 0, width, height);
-
+    textFont(waveFont);
     textSize(72);
     fill(255, 255);
     text("Game Paused", width / 2, height / 2);
@@ -210,17 +213,17 @@ public class Game {
     checkPlayerPowerUpCollisions();
     checkPlayerLaserCollisions();
   }
- 
-  
+
+
 
   public void checkPlayerLaserCollisions() {
     for (Player player : players) {
       if (player.usingGun() || player.down || !player.isFiring()) {
         continue;
       }
-      
+
       Enemy target = player.getClosestHitEnemy();
-      
+
       if (target != null) {      
         float targetDistance = dist(player.x, player.y, target.x, target.y);
         if (game.frameCount() - player.lastLaser > Player.LASER_RATE / (player.hasFireRate() ? 2 : 1)) {
@@ -293,7 +296,7 @@ public class Game {
     ArrayList<PowerUp> toRemove = new ArrayList<PowerUp>();
     for (PowerUp powerUp : powerUps) {
       for (Player player : players) {
-        if (player.down){
+        if (player.down) {
           continue;
         }
         if (collided(powerUp.x, powerUp.y, PowerUp.POWER_UP_RADIUS / 2, player.x, player.y, player.radius)) {
@@ -405,11 +408,14 @@ public class Game {
     powerUps.add(powerUp);
     lastPowerUpSpawn = game.frameCount();
   }
-  
+
   private boolean gameLost() {
+    if (timeOfLosing != UNINITIALIZED) {
+      return true;
+    }  
     for (Player player : players) {
       if (!player.down) {
-        return false; 
+        return false;
       }
     }
     if (timeOfLosing == UNINITIALIZED) {
@@ -417,7 +423,7 @@ public class Game {
     }  
     return true;
   }
-  
+
   private void drawGameOverScreen() {
     noStroke();
     rectMode(CENTER);
@@ -433,60 +439,61 @@ public class Game {
 
     text("Over", gameOverTextX + 25, 150);
     text("Game", width - gameOverTextX - 25, 150);
-    
+
     boolean shouldShowScoreBanner = gameOverTextX == 850;
     if (shouldShowScoreBanner) {
-       fill(255, 150);
-       scoreTextWidth = constrain(scoreTextWidth + 100, 0, width);
-       rectMode(CENTER);
-       rect(width/2, height/2, scoreTextWidth, height/2);
+      fill(255, 150);
+      scoreTextWidth = constrain(scoreTextWidth + 100, 0, width);
+      rectMode(CENTER);
+      rect(width/2, height/2, scoreTextWidth, height/2);
     }
-    
+
     boolean shouldShowScoreAndBackButton = scoreTextWidth == width;
-    
+
     if (shouldShowScoreAndBackButton) {
-       noStroke();
-       rectMode(CENTER);
-       fill(46, 204, 113);
-       rect(width - 250, height/2, 500, 200, 10);
-       
-       fill(255);
-       textFont(waveFont, 50);
-       text("Wave " + waveLevel, width * 4/5, height/2 - 20);
-       
-       fill(0);
-       textFont(waveFont, map(sin(frameCount/10.0), -1, 1, 48, 54));
-       text(getFormattedTimeElapsed(), width * 4/5, height/2 + 60);
-       
-       fill(255, 102, 102);
-       backButtonX = constrain(backButtonX + 50, -500, width/4);
-       noStroke();
-       rectMode(CENTER);
-       rect(0, height/2, 1000, 200, 10);
-       textFont(waveFont, 50);
-       fill(255);
-       text("Main Menu", backButtonX - 100, height/2 - 20);
-              
-       fill(0);
-       textFont(waveFont, 42);
-       text("Press", backButtonX - 150, height/2 + 45);
-       
-       noFill();
-       strokeWeight(4);
-       ellipseMode(CENTER);
-       textFont(timeFont, 50);
-       
-       image(backButton, backButtonX - 60, height / 2);
+      backButtonX = constrain(backButtonX + 50, -500, width/4);
+      noStroke();
+      rectMode(CENTER);
+      fill(46, 204, 113);
+      rect(width - 250, height/2, 500, 200, 10);
+
+      fill(255);
+      textFont(waveFont, 50);
+      text("Wave " + waveLevel, width - backButtonX + 80, height/2 - 20);
+
+      fill(0);
+      textFont(waveFont, map(sin(frameCount/10.0), -1, 1, 48, 54));
+      text(getFormattedTimeElapsed(), width - backButtonX + 80, height/2 + 60);
+
+      fill(255, 102, 102);
+
+      noStroke();
+      rectMode(CENTER);
+      rect(0, height/2, 1000, 200, 10);
+      textFont(waveFont, 50);
+      fill(255);
+      text("Main Menu", backButtonX - 100, height/2 - 20);
+
+      fill(0);
+      textFont(waveFont, 42);
+      text("Press", backButtonX - 150, height/2 + 45);
+
+      noFill();
+      strokeWeight(4);
+      ellipseMode(CENTER);
+      textFont(timeFont, 50);
+
+      image(backButton, backButtonX - 60, height / 2);
     }
   }
-  
+
   private void displayWave() {
     fill(0);
     textAlign(CORNER);
     textFont(waveFont, 30);
     text("Wave " + waveLevel, 35, 50);
   }
-  
+
   private void displayTime() {
     String time = getFormattedTimeElapsed();
     fill(0);
@@ -494,7 +501,7 @@ public class Game {
     textFont(timeFont, 30);
     text(time, 35, 100);
   }
-  
+
   private String getFormattedTimeElapsed() {
     long currentTime = gameLost() ? timeOfLosing : System.currentTimeMillis();
     long timeElapsed = currentTime - startTime;

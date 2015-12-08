@@ -4,7 +4,7 @@ public class Boss extends Enemy {
     this.speed = getEnemySpeedForWave(waveNum) / 2;
     this.shootingMarginOfError = getShootingMarginOfErrorForWave(waveNum);
     this.bulletSpeed = getBulletSpeedForWave(waveNum) * 2;
-    this.hp = (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR) * 2;
+    this.hp = (int)(BASE_HEALTH + waveNum * HEALTH_FACTOR) * 5;
     this.maxHp = hp;
     this.radius = ENEMY_RADIUS * 2;
     this.rFillColor = 255;
