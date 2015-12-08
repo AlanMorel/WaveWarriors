@@ -44,7 +44,7 @@ public class Bullet {
 
   public void setVelocity(final float speed, final float direction) {
     this.speed = speed; 
-    this.direction = (direction + 180) / 57; //idk man math is strange
+    this.direction = (direction + 180) / (float) 180 * (float) Math.PI;
   }
 
   public void setPosition(final float x, final float y) {

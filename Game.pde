@@ -19,8 +19,6 @@ public class Game {
   private long timeOfLosing;
   
   public  boolean playerSelectedMainMenu;
-  
-  private PImage backArrow;
   private PImage backButton;
 
   PFont timeFont;
@@ -30,7 +28,7 @@ public class Game {
   public static final int BASE_FONT_SIZE = 125;
   public static final int INTRO_FRAME_LENGTH = 150;
 
-  public static final int POWER_UP_SPAWN_DELAY = 1000;
+  public static final int POWER_UP_SPAWN_DELAY = 500;
   
   public static final int UNINITIALIZED = -1;
 
@@ -45,19 +43,19 @@ public class Game {
     this.players = new ArrayList<Player>();
 
     if (player1) {
-      players.add(new Player(1, 100, 100, controller1, false));
+      players.add(new Player(1, 300, 300, controller1, false));
     }
 
     if (player2) {
-      players.add(new Player(2, 1100, 100, controller1, false));
+      players.add(new Player(2, 800, 300, controller1, false));
     }
 
     if (player3) {
-      players.add(new Player(3, 100, 500, controller3, false));
+      players.add(new Player(3, 300, 500, controller3, false));
     }
 
     if (player4) {
-      players.add(new Player(4, 1100, 500, controller4, false));
+      players.add(new Player(4, 800, 500, controller4, false));
     }
     
     this.paused = false;
@@ -72,7 +70,6 @@ public class Game {
     this.gameOverTextX = -2000;
     this.scoreTextWidth = 0;
     this.backButtonX = -500;
-    this.backArrow = loadImage("backArrow.png");
     this.backButton = loadImage("backButton.png");
     this.playerSelectedMainMenu = false;;
 
@@ -110,6 +107,8 @@ public class Game {
       keys[BACKSPACE] = false;
     }
 
+    updateWaveFont();
+
     if (paused) {
       return;
     }
@@ -119,7 +118,6 @@ public class Game {
       healAllPlayers();
     }
 
-    updateWaveFont();
     updateIntroductionStatus();
     checkCollisions();
 
@@ -169,7 +167,8 @@ public class Game {
 
     drawPowerUps();
     drawPlayers();
-
+    wave.display();
+    
     if (isIntroducingWave) {
       introduceWave(waveLevel);
     }
@@ -182,10 +181,10 @@ public class Game {
     
     if (gameLost()) {
       drawGameOverScreen(); 
+    } else {
+      displayWave();
+      displayTime();
     }
-    
-    displayWave();
-    displayTime();
   }
 
   void mouseClicked() {
@@ -430,10 +429,10 @@ public class Game {
     textFont(waveFont, BASE_FONT_SIZE + 25);
     fill(255, 235);
 
-    gameOverTextX = constrain(gameOverTextX + 60, -500, 850);
+    gameOverTextX = constrain(gameOverTextX + 10, -500, 850);
 
-    text("Over", gameOverTextX, 150);
-    text("Game", width - gameOverTextX, 150);
+    text("Over", gameOverTextX + 25, 150);
+    text("Game", width - gameOverTextX - 25, 150);
     
     boolean shouldShowScoreBanner = gameOverTextX == 850;
     if (shouldShowScoreBanner) {
@@ -444,41 +443,40 @@ public class Game {
     }
     
     boolean shouldShowScoreAndBackButton = scoreTextWidth == width;
+    
     if (shouldShowScoreAndBackButton) {
-       fill(255, 235);
-       textFont(waveFont, 90);
-       text("Score", width * 3/4, height/2 - 50);
-       
-       fill(255, 102, 102, 200);
-       textFont(waveFont, map(sin(frameCount/8.0), -1, 1, 150, 175));
-       text(waveLevel, width * 3/4, height/2 + 100);
-       
-       backButtonX = constrain(backButtonX + 50, -500, width/4);
-       stroke(0);
-       strokeWeight(0.5);
+       noStroke();
        rectMode(CENTER);
-       rect(backButtonX, height/2, 400, 200, 50);
-       textFont(waveFont, 50);
-       fill(0, 175);
-       text("Main Menu", backButtonX, height/2 - 20);
-              
+       fill(46, 204, 113);
+       rect(width - 250, height/2, 500, 200, 10);
+       
        fill(255);
-       textFont(waveFont, 25);
-       text("Press", backButtonX - 70, height/2 + 45);
+       textFont(waveFont, 50);
+       text("Wave " + waveLevel, width * 4/5, height/2 - 20);
+       
+       fill(0);
+       textFont(waveFont, map(sin(frameCount/10.0), -1, 1, 48, 54));
+       text(getFormattedTimeElapsed(), width * 4/5, height/2 + 60);
+       
+       fill(255, 102, 102);
+       backButtonX = constrain(backButtonX + 50, -500, width/4);
+       noStroke();
+       rectMode(CENTER);
+       rect(0, height/2, 1000, 200, 10);
+       textFont(waveFont, 50);
+       fill(255);
+       text("Main Menu", backButtonX - 100, height/2 - 20);
+              
+       fill(0);
+       textFont(waveFont, 42);
+       text("Press", backButtonX - 150, height/2 + 45);
        
        noFill();
        strokeWeight(4);
        ellipseMode(CENTER);
        textFont(timeFont, 50);
        
-       stroke(255);
-       ellipse(backButtonX + 50, height/2 + 40, 100, 100);
-       text("B", backButtonX + 50, height/2 + 55);
-       
-       stroke(255, 80, 80, map(sin(frameCount/25.0), -1, 1, 0, 255));
-       ellipse(backButtonX + 50, height/2 + 40, 100, 100);
-       fill(255, 80, 80, map(sin(frameCount/25.0), -1, 1, 0, 255));
-       text("B", backButtonX + 50, height/2 + 55);
+       image(backButton, backButtonX - 60, height / 2);
     }
   }
   
@@ -486,7 +484,7 @@ public class Game {
     fill(0);
     textAlign(CORNER);
     textFont(waveFont, 30);
-    text("Wave " + waveLevel, 30, 30);
+    text("Wave " + waveLevel, 35, 50);
   }
   
   private void displayTime() {
@@ -494,7 +492,7 @@ public class Game {
     fill(0);
     textAlign(CORNER);
     textFont(timeFont, 30);
-    text(time, 30, 60);
+    text(time, 35, 100);
   }
   
   private String getFormattedTimeElapsed() {
@@ -503,7 +501,7 @@ public class Game {
     int minutes = (int) ((timeElapsed / (1000*60)) % 60);
     int seconds = (int) (timeElapsed / 1000) % 60;
     int mills = (int) timeElapsed % 1000;
-    return String.format("%02d:%02d.%03d", minutes, seconds, mills);
+    return String.format("%02d:%02d:%03d", minutes, seconds, mills);
   }
 }
 

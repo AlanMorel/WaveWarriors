@@ -11,7 +11,7 @@ AudioPlayer backgroundMusic;
 public ControlIO control;
 public Controller controller1, controller2, controller3, controller4;
 
-public boolean mac = true;
+public boolean mac = false;
 
 public int state;
 
@@ -29,7 +29,7 @@ void setup() {
   minim = new Minim(this);
   bulletSound = minim.loadSample("bullet.mp3", 512);
   powerUpSound = minim.loadSample("powerup.mp3", 512);
-  ultimateSound = minim.loadSample("ultimate.mp3", 512);
+  ultimateSound = minim.loadSample("ultimate.wav", 512);
   
   backgroundMusic = minim.loadFile("music.wav", 2048);
   backgroundMusic.loop();

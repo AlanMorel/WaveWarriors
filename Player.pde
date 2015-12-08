@@ -35,7 +35,7 @@ public class Player extends Entity {
   public float laserY;
 
   public Player(int id, int x, int y, Controller controller, boolean down) {
-    super(x, y, 10, 75);
+    super(x, y, 1, 75);
     this.id = id;
     this.bullets = new ArrayList<Bullet>();
     this.reviveTime = 0;
@@ -321,8 +321,11 @@ public class Player extends Entity {
     drawBullets();
     drawHpBar();
     drawEnergyBar();
-    drawPowerUp();
-    drawRevivalSystem();
+    if (partner == null && getPartner() == null) {
+      drawPowerUp();
+    } else {
+      drawRevivalSystem();
+    }
     drawCrosshairs();
   }
 
@@ -370,7 +373,6 @@ public class Player extends Entity {
       noStroke();
       fill(241 - (game.frameCount() % 25) * 5, 196 - (game.frameCount() % 25) * 5, 15 - (game.frameCount() % 25) * 5, 100 - (game.frameCount() % 50) * 2);    
       ellipse(x, y, radius * 2 + (game.frameCount() % 50) * 25, radius * 2 + (game.frameCount() % 50) * 25);
-   
     }
   }
 
@@ -458,7 +460,7 @@ public class Player extends Entity {
         int textX = id * 325 - 175;
         textSize(18);
         fill(0);
-        text("Hold 'X' to revive.", textX, height - 70);
+        text("Hold 'X' to revive.", textX, height - 90);
       }
       return;
     }
@@ -466,9 +468,9 @@ public class Player extends Entity {
     int revivalBarX = id * 325 - 175;
     rectMode(CORNER);
     fill(0);
-    rect(revivalBarX - 75, height - 80, 150, 15, 3);
+    rect(revivalBarX - 75, height - 100, 150, 15, 3);
     fill(255);
-    rect(revivalBarX - 75, height - 80, getReviveDuration() * 150 / REVIVE_TIME, 15, 3);
+    rect(revivalBarX - 75, height - 100, getReviveDuration() * 150 / REVIVE_TIME, 15, 3);
   }
 
   private void drawCrosshairs() {
