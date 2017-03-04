@@ -1,5 +1,5 @@
 # WaveWarriors
-**WaveWarriors** is a zombie-style survival game on Windows and Mac. It was written using the Processing library and is played using an Xbox Controller.
+**WaveWarriors** is a local multiplayer zombie-style survival game on Windows and Mac. Play for as long as you can as the waves of enemies get larger, faster and stronger. Various power ups are scattered around the place to aid in your survival. The game was written using the Processing library in Java, and is played using Xbox Controllers. It supports up to 4 players so grab a few friends, connect your controllers and start working together!
 
 ## Technologies
 * [Processing](https://processing.org/reference/libraries/) - visual arts software
