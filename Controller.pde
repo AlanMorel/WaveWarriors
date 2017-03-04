@@ -20,7 +20,7 @@ public class Controller {
   public Controller(int player) {
     this.player = player;
 
-    this.device = control.getDevice(mac ? "X360Controller" : "Controller (XBOX One For Windows)");
+    this.device = control.getDevice(mac ? "X360Controller" : "Controller (Xbox One For Windows)");
 
     this.A = device.getButton(mac ? "0" : "Button 0");
     this.B = device.getButton(mac ? "1" : "Button 1");
