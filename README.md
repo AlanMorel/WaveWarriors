@@ -6,9 +6,9 @@
 
 ## Screenshots
 
-![alt tag](http://i.imgur.com/WYUuiXl.png)
-![alt tag](http://i.imgur.com/6sY3rKq.png)
-![alt tag](http://i.imgur.com/lPgwjYf.png)
+![alt tag](https://i.imgur.com/WYUuiXl.png)
+![alt tag](https://i.imgur.com/6sY3rKq.png)
+![alt tag](https://i.imgur.com/lPgwjYf.png)
 
 ## License
 **WaveWarriors** is licensed under the [MIT license](LICENSE).
